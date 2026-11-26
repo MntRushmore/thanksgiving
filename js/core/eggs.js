@@ -71,9 +71,14 @@
     flooding = true;
     const l = layer();
     const svg = S('svg', { class: 'egg-gravy', viewBox: '0 0 1200 800', preserveAspectRatio: 'none' });
-    const wave = S('path', { fill: '#6b3f1d' });
+    svg.appendChild(S('defs', null, S('linearGradient', { id: 'egg-gr', x1: 0, x2: 0, y1: 0, y2: 1 },
+      S('stop', { offset: 0, 'stop-color': '#9a5f2c' }), S('stop', { offset: 0.25, 'stop-color': '#6b3f1d' }), S('stop', { offset: 1, 'stop-color': '#3a200c' }))));
+    const wave = S('path', { fill: 'url(#egg-gr)' });
     const wave2 = S('path', { fill: 'rgba(140,90,45,.6)' });
-    svg.append(wave2, wave);
+    const sheen = S('path', { fill: 'none', stroke: 'rgba(255,214,160,.4)', 'stroke-width': 4, 'stroke-linecap': 'round' });
+    const roll = S('g', null, S('ellipse', { rx: 46, ry: 30, fill: '#d9a45e', stroke: '#1c130c', 'stroke-width': 3 }), S('path', { d: 'M-24 -16 Q0 -30 24 -16', stroke: '#a8702e', 'stroke-width': 4, fill: 'none' }), S('ellipse', { cx: -12, cy: -14, rx: 12, ry: 5, fill: 'rgba(255,240,210,.5)' }));
+    const pea = S('circle', { r: 11, fill: '#6f9a3a', stroke: '#1c130c', 'stroke-width': 2.5 });
+    svg.append(wave2, roll, pea, wave, sheen);
     l.appendChild(svg);
     LT.audio.sfx('pour', { n: 14 });
     setTimeout(() => LT.audio.sfx('pour', { n: 10 }), 1300);
@@ -89,6 +94,12 @@
       };
       wave.setAttribute('d', mk(16, 0, 2.4));
       wave2.setAttribute('d', mk(22, 1.8, 1.7));
+      let sd = '';
+      for (let x = 0; x <= 1200; x += 40) sd += `${x ? 'L' : 'M'}${x} ${y + 6 + Math.sin(x / 120 + t * 2.4) * 16}`;
+      sheen.setAttribute('d', sd);
+      const surf = (x) => y + Math.sin(x / 120 + t * 2.4) * 16;
+      roll.setAttribute('transform', `translate(330 ${surf(330) - 4}) rotate(${Math.sin(t * 2) * 10})`);
+      pea.setAttribute('transform', `translate(${820 + Math.sin(t) * 30} ${surf(820) - 2})`);
       if (t > 6.2) { off(); l.remove(); flooding = false; }
     });
     LT.egg('gravyflood', 'Gravy flood', 'There is never enough gravy. Until there is.');
