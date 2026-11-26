@@ -3,17 +3,24 @@
 An interactive Thanksgiving in five courses: the history, the food, the chaos of the
 family table, and what gratitude actually is.
 
-You start in the dark and strike a match. It lights a real candle in a real 3D room, and
-the camera pulls back as every candle down a table that never ends catches, one after
-another, into the dark. Your cursor carries a light across the table for the rest of the
-night; shadows of glasses and candlesticks swing away from it. That's the whole idea of
-the piece. **Gratitude is a kind of attention. It's where you choose to hold the light.**
+It opens on a gloriously tacky Thanksgiving e-card. It gets about two seconds before it
+catches fire and burns away, and you are in the dark with a matchbox.
 
-Between courses the camera walks you further down the long table. At the end of the
-night you blow out your candle, and your breath travels the length of the table, putting
-out every candle on it.
+Strike it, and a real candle lights in a real 3D room. The camera pulls back as every
+candle down a table that never ends catches, one after another, into the dark. Then you
+walk it. **The long table is time: every seat is a year.** Your end is tonight. Far enough
+down, the walls fall away and it is 1621; past the end of the table is the land before.
+You ride back up through 405 years, sit down with the family, go around the table, and at
+the end of the night you blow out your candle and your breath runs the whole length of it.
 
-| Course | | |
+The idea under all of it: **gratitude is a kind of attention. It's where you choose to hold
+the light.** Your cursor carries a light across the table the whole way.
+
+It plays like a talk: press Next (or the arrow keys, or swipe) through about fifty beats in
+five acts. Each of the five original courses is still here as a full interactive chapter,
+reachable from the journey as a side door ("second helpings") or from the bill of fare.
+
+| The five courses, as side doors | | |
 |---|---|---|
 | Prelude | *Strike a match* | Light the candle; the title appears. |
 | Bill of Fare | | The menu. Every course is a link; you can eat in any order. |
@@ -32,8 +39,11 @@ python3 -m http.server 8000
 # then open http://localhost:8000
 ```
 
-Opening `index.html` straight from disk works too. Chapters are deep-linkable:
-`#record`, `#spread`, `#table`, `#grace`, `#leftovers`.
+Opening `index.html` straight from disk works too. Deep links: `#journey`, and the single
+courses `#record`, `#spread`, `#table`, `#grace`, `#leftovers`.
+
+The 3D journey needs WebGL on a real GPU. On a software renderer, or if WebGL is missing,
+it hands you the 2D courses instead, which run anywhere.
 
 To make one self-contained HTML file (everything inlined except Google Fonts):
 
@@ -74,7 +84,9 @@ js/core/              util, audio, music, fx (particles + candle-light), candle,
                       family (the cast, drawn in SVG), app (router, veil, menu,
                       toasts, secrets, state), eggs (global secrets), boot
 js/chapters/          prelude, menu, record, spread, table, grace, leftovers
+js/acts/              the five acts of the journey (act1-record … act5-night)
 docs/DESIGN.md        the design brief and runtime API
+docs/JOURNEY.md       the journey: act API, space, and the script
 tools/build.mjs       inline everything into a single file
 ```
 

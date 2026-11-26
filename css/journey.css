@@ -71,3 +71,15 @@
   .jr-next { padding: 0 16px; }
   .jr-label { font-size: 16px; }
 }
+
+.jr-actcard { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: 10px; padding: 0 24px; pointer-events: none;
+  background: radial-gradient(ellipse 55% 40% at 50% 50%, rgba(6, 4, 3, 0.7), rgba(6, 4, 3, 0) 75%); animation: jr-actcard 3.2s ease both; }
+.jr-actcard .k { font-family: var(--f-sc); letter-spacing: 0.24em; color: var(--lemon); font-size: var(--step--1); }
+.jr-actcard .t { font-family: var(--f-display); font-size: var(--step-5); line-height: 0.95; color: var(--linen); text-shadow: 0 4px 40px rgba(0, 0, 0, 0.8); }
+.jr-actcard .t i { color: var(--lemon); }
+.jr-actcard .b { font-family: var(--f-body); font-style: italic; color: var(--linen-2); font-size: var(--step-1); }
+@keyframes jr-actcard { 0% { opacity: 0; transform: scale(1.04); filter: blur(6px); } 18% { opacity: 1; transform: none; filter: none; } 70% { opacity: 1; } 100% { opacity: 0; transform: scale(0.98); } }
+.jr-cap.held { opacity: 0; transition: opacity 0.3s; }
+.jr-cap { transition: opacity 0.8s; }
+.journey-cta { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 18px; }
+.journey-cta .foot { margin-top: 4px; }

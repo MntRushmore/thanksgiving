@@ -128,6 +128,16 @@
     ui.note.classList.remove('in'); void ui.note.offsetWidth; ui.note.classList.add('in');
   }
 
+  /* ---------- an act announces itself ---------- */
+  function actCard(act) {
+    const t = el('div', { class: 't' }); t.append(el('i', null, (act.numeral || '') + '.'), ' ', act.title);
+    const card = el('div', { class: 'jr-actcard', 'aria-hidden': 'true' }, el('div', { class: 'k' }, act.course || ''), t, act.blurb ? el('div', { class: 'b' }, act.blurb) : null);
+    ui.layers.appendChild(card);
+    ui.cap.classList.add('held');
+    setTimeout(() => ui && ui.cap.classList.remove('held'), U.reducedMotion ? 300 : 2300);
+    setTimeout(() => card.remove(), U.reducedMotion ? 600 : 3200);
+  }
+
   /* ---------- moving between beats ---------- */
   async function go(i, dir = 1) {
     if (busy || i < 0 || i >= J.beats.length) return;
@@ -152,6 +162,7 @@
       try { curAct.enter && curAct.enter(W, old); } catch (e) { console.warn(e); }
       ui.act.innerHTML = '';
       ui.act.append(el('i', null, curAct.numeral ? curAct.numeral + '.' : ''), ' ', curAct.title || '');
+      if (old && dir > 0 && curAct.title) actCard(curAct);
       ui.act.classList.remove('in'); void ui.act.offsetWidth; ui.act.classList.add('in');
       LT.audio.sfx('paper', { dur: 0.35, g: 0.5 });
       const ch = document.querySelector('.chrome-course');
