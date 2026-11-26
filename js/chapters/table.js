@@ -416,6 +416,8 @@
       /* ---------- build the scene for the current shape ---------- */
       let L, svg, refs, figs, dogApi, dogWrap, seatsById, liveRoot;
       function build() {
+        if (figs) Object.values(figs).forEach((f) => f.destroy());
+        if (dogApi) dogApi.destroy();
         const r = root.getBoundingClientRect();
         L = (r.width || innerWidth) / (r.height || innerHeight) > 1.12 ? WIDE : TALL;
         root.classList.toggle('tb-wide', L === WIDE);
@@ -528,7 +530,7 @@
         const def = LT.family.get(id);
         return { x: s.x, y: (s.oy ?? s.y) - 222 * s.s * (def && def.scale ? def.scale : 1) };
       };
-      const hudBottom = () => { const r = hud.getBoundingClientRect(); return r.bottom - root.getBoundingClientRect().top + 6; };
+      const hudBottom = () => { if (hud.hidden) return 60; const r = hud.getBoundingClientRect(), k = skipBtn && !skipBtn.hidden && !U.isTouch ? skipBtn.getBoundingClientRect().bottom : 0; return Math.max(r.bottom, k) - root.getBoundingClientRect().top + 6; };
 
       let lightsOn = false;
       function setLights(on, instant) {
@@ -547,10 +549,12 @@
           const r = root.getBoundingClientRect();
           const want = r.width / r.height > 1.12 ? WIDE : TALL;
           if (want !== L && G.state !== 'ending' && G.state !== 'toast') { clearBubbles(true); clearIncidents(true); build(); }
-          else repositionAll();
+          repositionAll();
         }, 200);
       });
       api.cleanup(() => { Object.values(figs).forEach((f) => f.destroy()); dogApi && dogApi.destroy(); });
+
+      const floatAt = (x, y, text, o = {}) => LT.fx.float(U.clamp(x, Math.min(140, innerWidth / 2), innerWidth - Math.min(140, innerWidth / 2)), Math.max(90, y), text, o);
 
       /* ---------- sound helpers ---------- */
       const A = LT.audio;
@@ -603,7 +607,8 @@
         bingoEl.appendChild(c);
         return c;
       });
-      const bingoWrap = el('div', { class: 'tb-bingowrap' }, el('div', { class: 'tb-bingo-k' }, 'Family Bingo'), bingoEl);
+      const bingoCount = el('span', { class: 'n' }, '1/9');
+      const bingoWrap = el('div', { class: 'tb-bingowrap' }, el('div', { class: 'tb-bingo-k' }, 'Family Bingo ', bingoCount), bingoEl);
       const skipBtn = el('button', { class: 'tb-skip', type: 'button' }, 'Skip dinner');
       hud.append(el('div', { class: 'tb-hud-l' }, thermo.wrap, clockEl), skipBtn);
       root.appendChild(bingoWrap);
@@ -618,6 +623,8 @@
         G.bingo.add(i);
         bingoCells[i].classList.add('on');
         bingoCells[i].animate([{ transform: 'scale(1.35)' }, { transform: 'scale(1)' }], { duration: 400, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+        bingoCount.textContent = `${G.bingo.size}/9`;
+        bingoWrap.animate([{ filter: 'brightness(1.25)' }, { filter: 'none' }], { duration: 500 });
         LT.state.bingo = [...G.bingo].map((k) => BINGO[k].replace(/[“”]/g, '"'));
         LT.save();
         const lines = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
@@ -971,7 +978,7 @@
         const msg = i.def.handled(i);
         const r = i.el.getBoundingClientRect();
         A.sfx('pop', { f: 1000, g: 0.2 }); A.sfx('pluck', { n: 79, g: 0.16 });
-        LT.fx.float(r.left + r.width / 2, r.top - 6, msg, { size: U.isTouch ? 22 : 28, color: '#f2c14e' });
+        floatAt(r.left + r.width / 2, r.top - 6, msg, { size: U.isTouch ? 22 : 28, color: '#f2c14e' });
         if (i.type === 'dog') dogClick(true);
       }
       function failIncident(i) {
@@ -1017,7 +1024,7 @@
           dogApi.bark(); dogApi.mood('happy');
           api.timeout(() => dogApi.mood('beg'), 900);
           const r = dogBtn.getBoundingClientRect();
-          LT.fx.float(r.left + r.width / 2, r.top, U.pick(['woof', 'boof', 'wrf!', '*wag*']), { size: 22, color: '#efe6d2' });
+          floatAt(r.left + r.width / 2, r.top, U.pick(['woof', 'boof', 'wrf!', 'wag wag']), { size: 22, color: '#efe6d2' });
         }
         if (G.dogClicks === 7 && !G.gotLeg) giveLeg();
       }
@@ -1194,7 +1201,7 @@
         if (refs.popup) { refs.popup.setAttribute('height', 24); refs.popup.setAttribute('y', -116); refs.popupCap.setAttribute('y', -118); }
         const tp = pt(refs.turkey.x, refs.turkey.y - 60);
         A.sfx('boing'); A.sfx('pop', { f: 700, g: 0.4 });
-        LT.fx.float(tp.x, tp.y - 20, skipped ? 'You left. It went like this.' : '165°F. DONE.', { size: 34, color: '#ff6a3a', life: 2 });
+        floatAt(tp.x, tp.y - 20, skipped ? 'You left. It went like this.' : '165°F. DONE.', { size: 34, color: '#ff6a3a', life: 2 });
         await api.wait(450);
         // TOTAL CHAOS
         G.state = 'ending';
@@ -1234,6 +1241,7 @@
         murmur && murmur.stop && murmur.stop(0.05);
         LT.music.stop(0.06);
         refs.alarmLed && refs.alarmLed.classList.remove('on');
+        LT.fx.clearGlass();
         // freeze frame: swap in a dead copy of the room
         const frozen = svg.cloneNode(true);
         frozen.classList.add('tb-frozen');
@@ -1283,8 +1291,7 @@
           el('h2', null, 'Kids’ Table ', el('i', null, 'Graduate')),
           el('p', null, `This certifies that you survived Thanksgiving dinner with this family. You changed the subject ${G.defused} time${G.defused === 1 ? '' : 's'}, handled ${G.handled} incident${G.handled === 1 ? '' : 's'}, and kept the room at ${Math.round(G.maxTemp)}°F.`),
           el('p', { class: 'big' }, 'You are hereby promoted from the kids’ table. Effective next year. Bring a dish.'),
-          el('div', { class: 'sig' }, el('span', { class: 'lt-script' }, 'Ruth'), el('small', null, 'Grandma Ruth · Head of the Table')),
-          el('div', { class: 'seal', 'aria-hidden': 'true' }, 'R'),
+          el('div', { class: 'sig' }, el('div', { class: 'sigrow' }, el('span', { class: 'lt-script' }, 'Ruth'), el('div', { class: 'seal', 'aria-hidden': 'true' }, 'R')), el('small', null, 'Grandma Ruth · Head of the Table')),
           miniBingo(),
           ok);
         overlay.appendChild(cert);
