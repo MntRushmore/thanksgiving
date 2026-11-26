@@ -5,18 +5,19 @@
 .sp-wrap.drowsy { filter: blur(4px) brightness(0.55) saturate(0.7); }
 .sp-head { text-align: center; max-width: 760px; }
 .sp-head .lt-eyebrow { margin: 0; }
-.sp-head h1 { font-size: var(--step-4); margin-top: 2px; }
+.sp-head h1 { font-size: clamp(2.4rem, 1.6rem + 3vw, 4.4rem); margin-top: 2px; }
 .sp-lede { font-family: var(--f-body); font-style: italic; color: var(--linen-2); margin: 0.35rem auto 0; max-width: 46ch; text-wrap: balance; }
 .sp-count { font-family: var(--f-sc); letter-spacing: 0.14em; color: var(--linen-3); font-size: var(--step--1); margin: 0.5rem 0 0; font-variant-numeric: tabular-nums; }
 .sp-count.all { color: var(--lemon); }
 .sp-tablewrap { width: 100%; max-width: 1360px; margin-top: 10px; }
-.sp-table { width: 100%; height: auto; display: block; max-height: calc(100vh - 230px); overflow: visible; }
+.sp-table { width: 100%; height: auto; display: block; max-height: calc(100vh - 200px); overflow: visible; }
 @media (max-width: 719px) { .sp-table { max-height: none; } .sp-head h1 { font-size: var(--step-3); } }
 
 .sp-dish { cursor: pointer; outline: none; }
 .sp-dish-art { transition: transform 0.4s var(--ease-out), filter 0.4s; transform-box: fill-box; transform-origin: 50% 70%; }
 .sp-dish:hover .sp-dish-art, .sp-dish:focus-visible .sp-dish-art { transform: translateY(-6px) scale(1.045); filter: drop-shadow(0 0 18px rgba(255, 190, 100, 0.6)) brightness(1.12); }
 .sp-dish:active .sp-dish-art { transform: translateY(-2px) scale(1.02); }
+.sp-table.is-port .sp-label { font-size: 36px; }
 .sp-label { font-family: var(--f-hand); font-weight: 700; font-size: 27px; fill: var(--linen-2); paint-order: stroke; stroke: rgba(15, 11, 8, 0.9); stroke-width: 6px; stroke-linejoin: round; transition: fill 0.3s; pointer-events: none; }
 .sp-dish:hover .sp-label, .sp-dish:focus-visible .sp-label { fill: var(--lemon); }
 .sp-dish:focus-visible .sp-label { text-decoration: underline; }
@@ -57,10 +58,13 @@
 .sp-status { font-family: var(--f-hand); font-weight: 700; font-size: 1.4rem; color: var(--lemon); margin: 0 0 0.9rem; line-height: 1.2; }
 .sp-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.3rem; }
 @media (max-width: 820px) {
-  .sp-scene { grid-template-columns: 1fr; grid-template-rows: minmax(380px, 64vh) auto; overflow-y: auto; overscroll-behavior: contain; }
+  .sp-scene { grid-template-columns: 1fr; grid-template-rows: max(420px, 68vh) auto; overflow-y: auto; overscroll-behavior: contain; }
   .sp-story { overflow: visible; border-left: 0; border-top: 1px solid rgba(239, 230, 210, 0.1); padding: 22px max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 40px) max(16px, env(safe-area-inset-left, 0px)); }
-  .sp-hint { top: calc(env(safe-area-inset-top, 0px) + 104px); font-size: 1.12rem; }
-  .sp-toy { top: calc(env(safe-area-inset-top, 0px) + 96px); bottom: 58px; }
+  .sp-hint { top: calc(env(safe-area-inset-top, 0px) + 100px); font-size: 1.1rem; }
+  .sp-toy { top: calc(env(safe-area-inset-top, 0px) + 132px); bottom: 62px; }
+  .sp-plate-note { bottom: calc(env(safe-area-inset-bottom, 0px) + 60px); }
+  .sp-wishform { bottom: 60px; }
+  .sp-advice { position: fixed; z-index: 10; top: 50%; max-height: 80vh; width: min(94vw, 520px); }
 }
 
 /* fryer advice */
@@ -100,13 +104,15 @@
 .sp-wishform input { flex: 1 1 200px; min-width: 0; font-family: var(--f-hand); font-size: 1.35rem; color: var(--linen); background: rgba(239, 230, 210, 0.06); border: 1px solid rgba(239, 230, 210, 0.25); padding: 0.35em 0.6em; border-radius: 2px; }
 .sp-wishform input::placeholder { color: var(--linen-3); }
 .sp-wishform.gone { opacity: 0; transform: translate(-50%, 20px); pointer-events: none; }
-.sp-wish-label { font-family: var(--f-hand); font-weight: 700; font-size: 34px; fill: var(--lemon); paint-order: stroke; stroke: rgba(15, 11, 8, 0.9); stroke-width: 6px; }
+.sp-wish-label { font-family: var(--f-hand); font-weight: 700; font-size: 40px; fill: var(--lemon); paint-order: stroke; stroke: rgba(15, 11, 8, 0.9); stroke-width: 6px; }
 
 /* the closer */
 .sp-sleepy { position: fixed; inset: 0; z-index: 6; display: grid; place-items: center; overflow: hidden; }
 .sp-lid { position: absolute; left: -12%; right: -12%; height: 54%; background: #060403; transition: transform 1.6s cubic-bezier(0.45, 0, 0.3, 1); }
-.sp-lid--top { top: 0; transform: translateY(-100%); border-radius: 0 0 50% 50% / 0 0 42% 42%; box-shadow: 0 24px 60px 10px #060403; }
-.sp-lid--bot { bottom: 0; transform: translateY(100%); border-radius: 50% 50% 0 0 / 42% 42% 0 0; box-shadow: 0 -24px 60px 10px #060403; }
+.sp-wrap.awake { transition: filter 0.4s ease; filter: blur(2.5px) brightness(0.7); }
+.sp-sleep-end { background: radial-gradient(ellipse at 50% 50%, rgba(10, 7, 4, 0.88), rgba(10, 7, 4, 0.5) 60%, rgba(10, 7, 4, 0.15)); }
+.sp-lid--top { top: 0; transform: translateY(-100%); border-radius: 0 0 50% 50% / 0 0 42% 42%; background: linear-gradient(#060403 72%, #1e0905); box-shadow: 0 18px 50px 8px rgba(40, 10, 4, 0.75); }
+.sp-lid--bot { bottom: 0; transform: translateY(100%); border-radius: 50% 50% 0 0 / 42% 42% 0 0; background: linear-gradient(#1e0905, #060403 28%); box-shadow: 0 -18px 50px 8px rgba(40, 10, 4, 0.75); }
 .sp-sleep-line { position: relative; z-index: 2; font-family: var(--f-display); font-size: var(--step-2); line-height: 1.2; text-align: center; max-width: 26ch; padding: 0 16px; text-wrap: balance; color: var(--linen); opacity: 0; filter: blur(6px); transition: opacity 0.9s, filter 0.9s; margin: 0; text-shadow: 0 2px 24px #000, 0 0 2px #000; }
 .sp-sleep-line.on { opacity: 1; filter: blur(0); }
 .sp-sleep-end { position: absolute; z-index: 3; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; opacity: 0; transition: opacity 1.4s; pointer-events: none; padding: 0 16px; text-align: center; }

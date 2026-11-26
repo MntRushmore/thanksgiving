@@ -200,7 +200,7 @@
 
     function spawn() {
       const fresh = Math.random() < 0.78;
-      berries.push({ x: R(212, 292), y: 98, vx: R(-15, 15), vy: R(0, 40), r: R(9, 11.5), fresh, e: fresh ? R(0.74, 0.84) : R(0.06, 0.16), bounced: false, counted: false, rot: R(TAU), sq: fresh ? 1 : R(0.78, 0.88), hue: R(-1, 1) });
+      berries.push({ x: R(236, 292), y: 98, vx: R(-10, 10), vy: R(0, 30), r: R(9, 11.5), fresh, e: fresh ? R(0.78, 0.86) : R(0.06, 0.16), bounced: false, counted: false, rot: R(TAU), sq: fresh ? 1 : R(0.78, 0.88), hue: R(-1, 1) });
       if (berries.length > 90) { const i = berries.findIndex((b) => b.counted); berries.splice(i >= 0 ? i : 0, 1); }
     }
     function collide(b, s) {
@@ -230,7 +230,7 @@
       } else if (impact > 180) A.sfx('bounce', { p: b.fresh ? R(0.15, 0.3) : 0.05, g: 0.06, pan: (b.x - 500) / 600 });
     }
     function step(dt) {
-      const n = 3, h = dt / n;
+      const n = Math.max(3, Math.ceil(dt * 320)), h = dt / n; // small steps: no tunnelling through the board
       for (let k = 0; k < n; k++) {
         for (const b of berries) {
           b.vy += G * h; b.x += b.vx * h; b.y += b.vy * h; b.rot += b.vx * h * 0.05;
@@ -238,6 +238,7 @@
         }
         for (let i = 0; i < berries.length; i++) for (let j = i + 1; j < berries.length; j++) {
           const a = berries[i], b = berries[j];
+          if (a.y < 430 || b.y < 430) continue; // only berries that have landed jostle
           const dx = b.x - a.x, dy = b.y - a.y, rr2 = a.r + b.r;
           if (Math.abs(dx) > rr2 || Math.abs(dy) > rr2) continue;
           const d = Math.hypot(dx, dy);
@@ -301,25 +302,21 @@
       cx.strokeStyle = 'rgba(20,12,6,.8)'; cx.lineWidth = 6; cx.beginPath(); cx.moveTo(BOARD[2] - 6, BOARD[3] + 6); cx.lineTo(BOARD[2] - 6, 600); cx.stroke();
       wood(580, 502, 30, 196, 0);
       // bowl back
-      cx.fillStyle = '#2a0a10'; ell(cx, BOWL.x, BOWL.y, BOWL.rx, 26); cx.fill();
+      cx.fillStyle = 'rgba(210,230,240,.06)'; ell(cx, BOWL.x, BOWL.y, BOWL.rx + 8, 26); cx.fill();
       // berries
       berries.forEach(drawBerry);
-      // bowl front (Delft)
+      // bowl front: clear glass, so you can see the haul
       cx.save();
       cx.beginPath(); cx.moveTo(BOWL.x - BOWL.rx - 8, BOWL.y); cx.ellipse(BOWL.x, BOWL.y, BOWL.rx + 8, BOWL.ry + 10, 0, Math.PI, 0, true);
       cx.ellipse(BOWL.x, BOWL.y, BOWL.rx + 8, 26, 0, 0, Math.PI, false); cx.closePath();
-      cx.fillStyle = linear(cx, BOWL.x - BOWL.rx, 0, BOWL.x + BOWL.rx, 0, [[0, '#a99d84'], [0.35, '#f5eedf'], [0.6, '#efe6d2'], [1, '#9a8e76']]);
-      cx.fill(); cx.strokeStyle = 'rgba(28,19,12,.8)'; cx.lineWidth = 3; cx.stroke();
-      cx.clip();
-      cx.strokeStyle = 'rgba(45,79,138,.8)'; cx.lineWidth = 3;
-      for (let i = 0; i < 6; i++) {
-        const x = BOWL.x - 110 + i * 44, y = BOWL.y + 60 + Math.sin(i) * 6;
-        cx.beginPath(); cx.moveTo(x - 14, y); cx.bezierCurveTo(x - 6, y - 26, x + 6, y + 26, x + 14, y); cx.stroke();
-        cx.beginPath(); cx.arc(x, y - 22, 4, 0, TAU); cx.stroke();
-      }
-      cx.lineWidth = 4; cx.beginPath(); cx.ellipse(BOWL.x, BOWL.y + 16, BOWL.rx + 2, 34, 0, 0.12, Math.PI - 0.12); cx.stroke();
+      cx.fillStyle = linear(cx, BOWL.x - BOWL.rx, 0, BOWL.x + BOWL.rx, 0, [[0, 'rgba(210,230,240,.22)'], [0.3, 'rgba(210,230,240,.05)'], [0.7, 'rgba(210,230,240,.04)'], [1, 'rgba(210,230,240,.2)']]);
+      cx.fill(); cx.strokeStyle = 'rgba(225,238,245,.55)'; cx.lineWidth = 3; cx.stroke();
+      cx.strokeStyle = 'rgba(255,255,255,.45)'; cx.lineWidth = 6; cx.lineCap = 'round';
+      cx.beginPath(); cx.ellipse(BOWL.x, BOWL.y, BOWL.rx - 14, BOWL.ry - 14, 0, Math.PI * 0.62, Math.PI * 0.85); cx.stroke();
+      cx.lineWidth = 3; cx.beginPath(); cx.ellipse(BOWL.x, BOWL.y, BOWL.rx - 18, BOWL.ry - 20, 0, Math.PI * 0.12, Math.PI * 0.22); cx.stroke();
       cx.restore();
-      cx.strokeStyle = 'rgba(28,19,12,.85)'; cx.lineWidth = 3; ell(cx, BOWL.x, BOWL.y, BOWL.rx + 8, 26); cx.stroke();
+      cx.fillStyle = 'rgba(225,238,245,.25)'; ell(cx, BOWL.x, BOWL.y + BOWL.ry + 12, 70, 10); cx.fill();
+      cx.strokeStyle = 'rgba(225,238,245,.6)'; cx.lineWidth = 2.5; ell(cx, BOWL.x, BOWL.y, BOWL.rx + 8, 26); cx.stroke();
       // crate front lip
       cx.fillStyle = linear(cx, 0, 560, 0, 600, [[0, '#7a4e26'], [1, '#3e2510']]);
       cx.fillRect(100, 566, 462, 34);
@@ -345,6 +342,7 @@
       ui.status(`Into the bowl: ${good} · Left behind: ${soft} · Fresh bounces, all time: ${LT.stats.get('cranberriesBounced')}`);
     }, 200);
     ui.status('Into the bowl: 0 · Left behind: 0');
+    ui.hint('Tap to drop a berry. Hold to pour.');
     ui.button('Pour a handful', () => { for (let i = 0; i < 12; i++) sc.timeout(spawn, i * 90); });
     sc.timeout(() => { for (let i = 0; i < 5; i++) sc.timeout(spawn, i * 260); }, 500);
   };
@@ -844,7 +842,7 @@
       LT.fx.flash('#ffb347', 0.55); LT.fx.shake(26, 1.4); LT.light.pulse();
       const sp = v.toScreen(POT.x, POT.top);
       LT.fx.sparks(sp.x, sp.y, 80, { speed: [200, 900] });
-      LT.fx.embers(10); sc.timeout(() => LT.fx.embers(0), 4000);
+      LT.fx.embers(10); sc.timeout(() => LT.fx.embers(0), 4000); sc.cleanup(() => LT.fx.embers(0));
       for (let i = 0; i < (RM ? 60 : 220); i++) {
         sc.timeout(() => {
           const a = -Math.PI / 2 + R(-0.9, 0.9);
@@ -1088,18 +1086,23 @@
         ell(cx, p.x, p.y, p.r, p.r * 1.3); cx.fill();
         cx.globalCompositeOperation = 'source-over';
       });
-      // the torch
+      // the torch: nozzle aims down-left at the pointer
       const p = v.ptr;
       if (p.inside || p.down) { ffx.x = p.x; ffx.y = p.y; }
-      cx.save(); cx.translate(ffx.x + 60, ffx.y - 90); cx.rotate(0.55);
-      cx.fillStyle = linear(cx, -26, 0, 26, 0, [[0, '#7a1a12'], [0.45, '#d83a28'], [1, '#6a140e']]); rr(cx, -26, -20, 52, 110, 14); cx.fill();
-      cx.strokeStyle = 'rgba(20,10,6,.8)'; cx.lineWidth = 2.5; cx.stroke();
-      cx.fillStyle = '#2a2a2a'; rr(cx, -18, -60, 36, 42, 6); cx.fill();
-      cx.fillStyle = linear(cx, -8, 0, 8, 0, [[0, '#6a6e70'], [0.5, '#e4e6e7'], [1, '#5a5e60']]); rr(cx, -8, -128, 16, 72, 4); cx.fill();
+      const nz = nozzle();
+      cx.save(); cx.translate(nz.x, nz.y); cx.rotate(0.5);
+      cx.fillStyle = linear(cx, -8, 0, 8, 0, [[0, '#5a5e60'], [0.5, '#e4e6e7'], [1, '#4a4e50']]); rr(cx, -7, -70, 14, 70, 3); cx.fill();
+      cx.fillStyle = '#1e1e1e'; rr(cx, -9, -6, 18, 8, 2); cx.fill();
+      cx.fillStyle = '#2a2a2a'; rr(cx, -18, -112, 36, 46, 7); cx.fill();
+      cx.fillStyle = '#f2c14e'; rr(cx, 14, -104, 14, 22, 4); cx.fill();
+      cx.fillStyle = linear(cx, -27, 0, 27, 0, [[0, '#6a140e'], [0.45, '#d83a28'], [1, '#5a120c']]); rr(cx, -27, -232, 54, 124, 16); cx.fill();
+      cx.strokeStyle = 'rgba(20,10,6,.85)'; cx.lineWidth = 2.5; cx.stroke();
+      cx.fillStyle = 'rgba(255,255,255,.25)'; rr(cx, -18, -224, 8, 100, 4); cx.fill();
       cx.restore();
-      cx.fillStyle = 'rgba(239,230,210,.6)'; cx.font = '600 24px Caveat, cursive'; cx.textAlign = 'center';
+      if (!firing && (p.inside || p.down)) { cx.strokeStyle = 'rgba(242,193,78,.4)'; cx.setLineDash([4, 6]); cx.lineWidth = 2; ell(cx, ffx.x, ffx.y, 26, 12); cx.stroke(); cx.setLineDash([]); }
     }
-    function nozzle() { return { x: ffx.x + 60 + Math.sin(0.55) * 128 - 4, y: ffx.y - 90 - Math.cos(0.55) * 128 }; }
+    const DIR = { x: -Math.sin(0.5), y: Math.cos(0.5) };
+    function nozzle() { return { x: ffx.x - DIR.x * 96, y: ffx.y - DIR.y * 96 }; }
     v.input({
       down(p) {
         downAt = performance.now();
@@ -1130,11 +1133,11 @@
     let acc = 0;
     sc.frame((dt, t) => {
       const nz = nozzle();
-      const tip = { x: nz.x - 30, y: nz.y + 120 };
+      const tip = { x: ffx.x, y: ffx.y };
       if (firing) {
-        for (let i = 0; i < 4; i++) {
-          const a = Math.PI / 2 + 0.25 + R(-0.12, 0.12), sp = R(400, 700);
-          flames.add({ x: nz.x, y: nz.y, vx: Math.cos(a) * sp * -0.3 + R(-20, 20), vy: Math.sin(a) * sp, r: R(8, 16), max: R(0.12, 0.22), blue: Math.random() < 0.6 });
+        for (let i = 0; i < 5; i++) {
+          const sp = R(420, 680), j = R(-0.12, 0.12);
+          flames.add({ x: nz.x, y: nz.y, vx: (DIR.x + j) * sp, vy: (DIR.y - j * 0.5) * sp, drag: 0.96, r: R(7, 15), max: R(0.12, 0.22), blue: Math.random() < 0.55 });
         }
         mallows.forEach((m) => {
           const d = Math.hypot(m.x - tip.x, m.y - 14 - tip.y);
@@ -1281,9 +1284,9 @@
       // stream
       if (st.pouring && st.boat > 0) {
         const s = spout();
-        cx.strokeStyle = '#6b3f1d'; cx.lineWidth = 10 + Math.sin(t * 20) * 2; cx.lineCap = 'round';
+        cx.strokeStyle = '#6b3f1d'; cx.lineWidth = 15 + Math.sin(t * 20) * 3; cx.lineCap = 'round';
         cx.beginPath(); cx.moveTo(s.x, s.y); cx.quadraticCurveTo(s.x + 70, s.y + 10, M.x - 10 + Math.sin(t * 6) * 6, 336); cx.stroke();
-        cx.strokeStyle = 'rgba(255,200,150,.25)'; cx.lineWidth = 3; cx.stroke();
+        cx.strokeStyle = 'rgba(255,200,150,.3)'; cx.lineWidth = 4; cx.stroke();
       }
       drops.list.forEach((d) => { cx.fillStyle = '#6b3f1d'; ell(cx, d.x, d.y, d.r, d.r * 1.3); cx.fill(); });
       // boat
@@ -1293,14 +1296,14 @@
       cx.beginPath(); cx.moveTo(-110, -24); cx.bezierCurveTo(-100, 50, 60, 60, 92, -4); cx.lineTo(126, -28); cx.lineTo(80, -24); cx.closePath(); cx.fill();
       cx.strokeStyle = 'rgba(28,19,12,.8)'; cx.lineWidth = 3; cx.stroke();
       cx.strokeStyle = 'rgba(45,79,138,.7)'; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(-100, -8); cx.bezierCurveTo(-60, 18, 40, 20, 84, 0); cx.stroke();
-      cx.lineWidth = 10; cx.strokeStyle = '#efe6d2'; cx.beginPath(); cx.arc(-124, 4, 22, Math.PI * 0.5, Math.PI * 1.6); cx.stroke();
-      cx.strokeStyle = 'rgba(28,19,12,.8)'; cx.lineWidth = 2.5; cx.beginPath(); cx.arc(-124, 4, 27, Math.PI * 0.5, Math.PI * 1.6); cx.stroke();
+      cx.strokeStyle = 'rgba(28,19,12,.85)'; cx.lineWidth = 15; cx.beginPath(); cx.arc(-112, -2, 22, Math.PI * 0.55, Math.PI * 1.5); cx.stroke();
+      cx.lineWidth = 10; cx.strokeStyle = '#efe6d2'; cx.beginPath(); cx.arc(-112, -2, 22, Math.PI * 0.55, Math.PI * 1.5); cx.stroke();
       if (st.boat > 0.02) { cx.fillStyle = '#5d3416'; ell(cx, -12, -24, 92 * Math.sqrt(st.boat), 9); cx.fill(); }
       cx.fillStyle = '#efe6d2'; ell(cx, -12, -26, 98, 10); cx.strokeStyle = 'rgba(28,19,12,.6)'; cx.lineWidth = 2; cx.stroke();
       cx.restore();
       // the meter
       const mx = 860, my = 110;
-      cx.fillStyle = 'rgba(239,230,210,.08)'; rr(cx, mx - 92, my - 70, 184, 120, 8); cx.fill();
+      cx.fillStyle = 'rgba(239,230,210,.08)'; rr(cx, mx - 118, my - 70, 236, 124, 8); cx.fill();
       cx.strokeStyle = 'rgba(239,230,210,.3)'; cx.lineWidth = 2; cx.stroke();
       cx.fillStyle = '#efe6d2'; cx.textAlign = 'center'; cx.font = '13px "IM Fell English SC", Georgia, serif'; cx.fillText('IS THERE ENOUGH GRAVY?', mx, my - 46);
       cx.strokeStyle = 'rgba(239,230,210,.5)'; cx.lineWidth = 3; cx.beginPath(); cx.arc(mx, my + 30, 60, Math.PI * 1.1, Math.PI * 1.9); cx.stroke();
@@ -1369,7 +1372,7 @@
       ell(cx, DX, DY, DRX, DRY); cx.fill();
       cx.save(); ell(cx, DX, DY, DRX, DRY); cx.clip();
       elbows.forEach((el2) => { cx.save(); cx.translate(el2.x, el2.y); cx.rotate(el2.rot); cx.strokeStyle = 'rgba(255,236,160,.75)'; cx.lineWidth = 7; cx.lineCap = 'round'; cx.beginPath(); cx.arc(0, 0, 9, 0.2, Math.PI * 0.9); cx.stroke(); cx.strokeStyle = 'rgba(150,90,20,.4)'; cx.lineWidth = 2; cx.beginPath(); cx.arc(0, 0, 12, 0.2, Math.PI * 0.9); cx.stroke(); cx.restore(); });
-      spots.forEach((s) => { cx.fillStyle = `rgba(150,80,20,${0.35 + s.a * 0.5})`; ell(cx, s.x, s.y, s.rx, s.ry, s.a); cx.fill(); });
+      spots.forEach((s) => { cx.fillStyle = radial(cx, s.x, s.y, s.rx, [[0, `rgba(170,90,25,${0.3 + s.a * 0.4})`], [1, 'rgba(170,90,25,0)']]); ell(cx, s.x, s.y, s.rx, s.ry, s.a); cx.fill(); });
       holes.forEach((h) => { cx.fillStyle = radial(cx, h.x, h.y, 40, [[0, '#c98a2a'], [1, 'rgba(226,166,52,0)']]); ell(cx, h.x, h.y, 42, 18); cx.fill(); });
       cx.restore();
       cx.fillStyle = 'rgba(255,240,200,.14)'; ell(cx, DX - 120, DY - 60, 120, 22, -0.1); cx.fill();
@@ -1557,8 +1560,8 @@
     sc.cleanup(() => svg.remove());
     const ink = { stroke: '#1c130c', 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
     // Dale at right
-    const dale = LT.family.figure('dale', { scale: 1.35, mood: 'smug' });
-    const daleG = S('g', { transform: 'translate(880 720)' }, dale.el);
+    const dale = LT.family.figure('dale', { scale: 1.2, mood: 'smug' });
+    const daleG = S('g', { transform: 'translate(850 735)' }, dale.el);
     svg.appendChild(daleG);
     sc.cleanup(() => dale.destroy());
     dale.arms(30, -70);
@@ -1592,15 +1595,14 @@
     const st = { you: 0, dale: 0, phase: 'wish', yanks: [], lastX: null, t: 0, broken: false };
     function layout() {
       const pl = st.you, pd = st.dale;
-      const bend = (pl + pd) * 6;
-      armL.setAttribute('transform', `rotate(${-bend - pl * 6})`);
-      armR.setAttribute('transform', `rotate(${bend + pd * 6})`);
-      const ang = (deg) => (deg * Math.PI) / 180;
-      const lA = ang(-bend - pl * 6), rA = ang(bend + pd * 6);
-      const tipL = { x: CX + Math.cos(lA) * -110 - Math.sin(lA) * -110, y: CY + Math.sin(lA) * -110 + Math.cos(lA) * -110 };
-      const tipR = { x: CX + Math.cos(rA) * 110 - Math.sin(rA) * -110, y: CY + Math.sin(rA) * 110 + Math.cos(rA) * -110 };
-      youWrap.setAttribute('transform', `translate(${tipL.x - pl * 30} ${tipL.y}) rotate(${-20 - pl * 10})`);
-      daleWrap.setAttribute('transform', `translate(${tipR.x + pd * 30} ${tipR.y}) rotate(${20 + pd * 10})`);
+      const bend = (pl + pd) * 5;
+      const aL = -(bend + pl * 7), aR = bend + pd * 7;
+      armL.setAttribute('transform', `rotate(${aL} 0 70)`);
+      armR.setAttribute('transform', `rotate(${aR} 0 70)`);
+      const tip = (s, deg) => { const a = (deg * Math.PI) / 180, vx = s * 110, vy = -180; return { x: CX + vx * Math.cos(a) - vy * Math.sin(a), y: CY + 70 + vx * Math.sin(a) + vy * Math.cos(a) }; };
+      const tL = tip(-1, aL), tR = tip(1, aR);
+      youWrap.setAttribute('transform', `translate(${tL.x} ${tL.y}) rotate(${-20 + aL * 0.6})`);
+      daleWrap.setAttribute('transform', `translate(${tR.x} ${tR.y}) rotate(${20 + aR * 0.6})`);
     }
     layout();
     // wish form
@@ -1640,6 +1642,7 @@
     svg.tabIndex = 0;
     function snap() {
       st.broken = true; st.phase = 'done';
+      ui.hint('');
       LT.stats.inc('wishbonesPulled');
       A.sfx('crack', { g: 0.8 });
       LT.fx.shake(6, 0.25);
@@ -1892,7 +1895,7 @@
         'Wild turkeys sleep in trees and fly fast in short bursts. Most farmed turkeys can’t fly at all; they’ve been bred too heavy to leave the ground.',
       ], cite: 'Sources: Franklin to Sarah Bache, Jan. 26, 1784 (Founders Online); Smithsonian Magazine.' },
     { id: 'cranberries', name: 'Cranberries', title: 'The Bounce Test', kicker: 'Cranberries', labelDy: 86,
-      land: [430, 300, 1.1], port: [585, 250, 1.0],
+      land: [410, 298, 1.1], port: [585, 250, 1.0],
       story: [
         'A fresh cranberry bounces. Inside it are four small pockets of air, which is also why it floats. Most of the crop is harvested wet: growers flood the bog, shake the berries loose, and corral a floating red lake.',
         'Sorting machines still use bounce boards. Firm berries hop the barrier; soft ones stay behind. The legend: a New Jersey grower named John “Peg-Leg” Webb, who couldn’t carry his berries down from the loft, poured them down the stairs instead, and noticed the best ones bounced all the way to the bottom.',
@@ -2003,7 +2006,7 @@
         layout = want;
         tableWrap.innerHTML = '';
         const VB = portrait ? [760, 1520] : [1400, 900];
-        svg = S('svg', { viewBox: `0 0 ${VB[0]} ${VB[1]}`, class: 'sp-table', role: 'group', 'aria-label': 'The Thanksgiving table' });
+        svg = S('svg', { viewBox: `0 0 ${VB[0]} ${VB[1]}`, class: 'sp-table' + (portrait ? ' is-port' : ''), role: 'group', 'aria-label': 'The Thanksgiving table' });
         svg.appendChild(tableDefs());
         // floor, table, runner
         svg.appendChild(S('rect', { width: VB[0], height: VB[1], fill: '#0f0b08' }));
@@ -2018,7 +2021,7 @@
           : S('rect', { x: run.x, y: run.y + o, width: run.w, height: 8, fill: '#6f1526', opacity: 0.75 });
         [14, 28].forEach((o) => { svg.appendChild(stripe(o)); svg.appendChild(stripe((portrait ? run.w : run.h) - o - 8)); });
         // decor
-        if (portrait) { svg.append(decor.candle(110, 300, 0.9), decor.candle(650, 300, 0.9), decor.roemer(380, 1270), decor.grapes(640, 1290)); }
+        if (portrait) { svg.append(decor.candle(84, 500, 0.85), decor.candle(676, 500, 0.85), decor.roemer(380, 1270), decor.grapes(640, 1290)); }
         else { svg.append(decor.candle(570, 170), decor.candle(830, 170), decor.roemer(1070, 150), decor.grapes(1300, 150), decor.grapes(120, 150)); }
         // the lemon (a still-life signature)
         const lp = portrait ? [150, 1300] : [140, 690];
@@ -2026,7 +2029,7 @@
         svg.appendChild(lem);
         const lemonClick = () => {
           A.sfx('pluck', { n: 76 });
-          LT.egg('vanitas', 'Vanitas', 'The half-peeled lemon in a Dutch still life: lovely skin, sour inside, already spoiling. Painted in the same decade the Pilgrims left Leiden. A reminder that the feast doesn’t last. Eat the pie.');
+          LT.egg('vanitas', 'Vanitas', 'The half-peeled lemon was a fixture of Dutch still lifes in the years right after the Pilgrims left Leiden: lovely skin, sour inside, already spoiling. A reminder that the feast doesn’t last. Eat the pie.');
         };
         api.on(lem, 'click', lemonClick);
         api.on(lem, 'keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); lemonClick(); } });
@@ -2162,7 +2165,7 @@
         root.scrollTo({ top: 0 });
         wrap.classList.add('drowsy');
         LT.music.param('level', 0.4);
-        LT.light.set({ darkness: 0.75, radius: 360 });
+        LT.light.set({ darkness: 0.3, radius: 700 });
         let skipped = false;
         skip.addEventListener('click', () => { skipped = true; finish(); });
         const lids = (k, dur = 1.6) => { lidT.style.transitionDuration = lidB.style.transitionDuration = dur + 's'; lidT.style.transform = `translateY(${-100 + k * 100}%)`; lidB.style.transform = `translateY(${100 - k * 100}%)`; };
@@ -2175,10 +2178,10 @@
           await api.wait(hold);
         };
         const lines = [
-          ['Getting sleepy?', 2200, 0.28],
-          ['Everyone blames the turkey. Turkey has tryptophan, which your body uses to make serotonin and melatonin.', 4200, 0.36],
-          ['So do chicken, eggs and cheese. Turkey has about as much as any of them.', 3400, 0.44],
-          ['What actually knocks you out is the size of the meal. And the pie. And the couch.', 3600, 0.49],
+          ['Getting sleepy?', 2200, 0.32],
+          ['Everyone blames the turkey. Turkey has tryptophan, which your body uses to make serotonin and melatonin.', 4200, 0.48],
+          ['So do chicken, eggs and cheese. Turkey has about as much as any of them.', 3400, 0.62],
+          ['What actually knocks you out is the size of the meal. And the pie. And the couch.', 3600, 0.76],
         ];
         snd.yawn();
         for (const [t, hold, k] of lines) {
@@ -2194,15 +2197,20 @@
           if (ov.classList.contains('done')) return;
           ov.classList.add('done');
           skip.remove();
-          lids(0.5, 1.1);
-          LT.light.set({ darkness: 0.3, radius: 560 });
+          lids(1.02, 1.1);
           line.classList.remove('on');
-          await api.wait(1500);
+          await api.wait(1800);
           // ding-dong
           const t0 = A.now();
           A.tone({ t: t0, f: 659, dur: 1.4, a: 0.004, g: 0.14, rev: 0.4 }); A.tone({ t: t0, f: 1318, dur: 0.6, a: 0.004, g: 0.04 });
           A.tone({ t: t0 + 0.55, f: 523, dur: 1.8, a: 0.004, g: 0.14, rev: 0.4 }); A.tone({ t: t0 + 0.55, f: 1046, dur: 0.7, a: 0.004, g: 0.04 });
-          await api.wait(1200);
+          await api.wait(700);
+          // eyes snap open
+          lids(0, 0.35);
+          wrap.classList.remove('drowsy'); wrap.classList.add('awake');
+          LT.light.set({ darkness: 0.45, radius: 560 });
+          LT.fx.flash('rgba(255,236,200,.5)', 0.25);
+          await api.wait(500);
           A.sfx('bark', { n: 2 });
           LT.music.param('level', 1);
           end.append(el('p', { class: 'sp-wake' }, 'Wake up. They’re here.'), api.nextButton());

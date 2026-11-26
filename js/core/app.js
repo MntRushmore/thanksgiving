@@ -63,8 +63,8 @@
 
   function setHash(id) {
     try {
-      if (id === 'prelude') { if (location.hash) history.replaceState(null, '', location.pathname + location.search); }
-      else if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+      if (id === 'prelude') return; // keep any requested course so a reload still lands there
+      if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
     } catch (e) { /* sandboxed frames may refuse; it's only a convenience */ }
   }
 
