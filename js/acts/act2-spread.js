@@ -632,7 +632,7 @@
           S.water.target = 0; S.bog.riseT = 0; S.dw.visible = false; S.stairs.visible = true;
           S.glow.light.position.set(1.6, 1.5, 0.55); S.glow.light.distance = 4.5; S.glow.base = 2.4;
           clearFlyers();
-          W.shot(V([2.05, 0.98, 1.3], [1.62, 0.3, -0.42], 42), { dur: 3 });
+          W.shot(portrait() ? { pos: [2.3, 1.42, 1.85], look: [1.78, 0.2, -0.42], fov: 56 } : V([2.05, 0.98, 1.3], [1.62, 0.3, -0.42], 42), { dur: 3 });
           const pour = () => {
             for (let i = 0; i < 28; i++) ctx.later(() => {
               const soft = S.rnd() < 0.3;

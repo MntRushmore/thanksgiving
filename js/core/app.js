@@ -97,6 +97,7 @@
     if (typeof extra === 'function') api.cleanup(extra);
     if (def.index >= 1 && !LT.state.visited.includes(def.id)) { LT.state.visited.push(def.id); LT.save(); }
     updateChrome(def);
+    document.body.dataset.chapter = def.id;
     setHash(def.id);
     LT.bus.emit('chapter', def.id);
   }

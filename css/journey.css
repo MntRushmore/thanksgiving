@@ -83,3 +83,6 @@
 .jr-cap { transition: opacity 0.8s; }
 .journey-cta { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 18px; }
 .journey-cta .foot { margin-top: 4px; }
+
+/* during the journey, secrets announce themselves at the top, clear of the captions */
+body[data-chapter="journey"] #toasts { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 62px); flex-direction: column; }
