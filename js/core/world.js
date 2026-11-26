@@ -811,6 +811,9 @@
     const p = (v.isVector3 ? v.clone() : v3(v[0], v[1], v[2])).project(camera);
     return { x: (p.x * 0.5 + 0.5) * innerWidth, y: (-p.y * 0.5 + 0.5) * innerHeight, on: p.z < 1 && p.z > -1 && Math.abs(p.x) < 1.2 && Math.abs(p.y) < 1.2 };
   };
+  const quake = { a: 0, t: 0, d: 0 };
+  /** shake the camera itself (amount in metres-ish, seconds) */
+  W.shake = (amount = 0.04, seconds = 0.6) => { if (U.reducedMotion) return; quake.a = Math.max(quake.a * (1 - quake.t / Math.max(quake.d, 0.001)), amount); quake.d = seconds; quake.t = 0; };
   W.cursorHit = () => hit.clone();
   W.cursorRay = () => ray;
   W.camState = () => ({ pos: cam.pos.clone(), look: cam.look.clone(), fov: cam.fov });
@@ -965,7 +968,9 @@
     cam.par.y += ((LT.pointer.active ? LT.pointer.y / innerHeight - 0.5 : 0) - cam.par.y) * Math.min(1, dt * 2);
     const hh = U.reducedMotion ? 0 : 1;
     camera.position.set(cam.pos.x + cam.par.x * 0.05 + U.noise(t * 0.31) * 0.006 * hh, cam.pos.y - cam.par.y * 0.03 + U.noise(t * 0.27 + 5) * 0.005 * hh, cam.pos.z);
-    camera.lookAt(cam.look.x + cam.par.x * 0.08, cam.look.y - cam.par.y * 0.04, cam.look.z);
+    let qx = 0, qy = 0;
+    if (quake.t < quake.d) { quake.t += raw || dt; const kq = 1 - quake.t / quake.d, a = quake.a * kq * kq; qx = (Math.random() - 0.5) * a; qy = (Math.random() - 0.5) * a; camera.position.x += qx; camera.position.y += qy; }
+    camera.lookAt(cam.look.x + cam.par.x * 0.08 + qx * 0.5, cam.look.y - cam.par.y * 0.04 + qy * 0.5, cam.look.z);
     if (Math.abs(camera.fov - cam.fov) > 0.01) { camera.fov = cam.fov; camera.updateProjectionMatrix(); }
     const sc = (innerHeight * pr) / (2 * Math.tan((camera.fov * Math.PI) / 360));
     R.flameU.uScale.value = sc; R.dustU.uScale.value = sc * 0.004;

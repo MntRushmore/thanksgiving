@@ -211,6 +211,7 @@
   let shakeT = 0, shakeAmt = 0, shakeDur = 0;
   FX.shake = (amount = 12, seconds = 0.5) => {
     if (RM) return;
+    if (LT.world && LT.world.ok && LT.world.visible && LT.world.shake) LT.world.shake(amount * 0.004, seconds);
     shakeAmt = Math.max(shakeAmt * (1 - shakeT / Math.max(shakeDur, 0.001)), amount); shakeDur = seconds; shakeT = 0;
   };
   LT.loop.add((dt) => {

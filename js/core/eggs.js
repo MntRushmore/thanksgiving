@@ -145,7 +145,7 @@
   ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((e) => addEventListener(e, wake, { passive: true }));
   addEventListener('pointermove', () => { if (!napping) lastInput = performance.now(); else if (LT.pointer.speed > 6) wake(); }, { passive: true });
   setInterval(() => {
-    if (napping || document.hidden || inPrelude() || !LT.current()) return;
+    if (napping || document.hidden || inPrelude() || !LT.current() || LT.current() === 'journey') return;
     if (performance.now() - lastInput > 90000) {
       napping = el('div', { class: 'egg-nap', 'aria-hidden': 'true' }, el('span', { class: 'z z1' }, 'z'), el('span', { class: 'z z2' }, 'z'), el('span', { class: 'z z3' }, 'Z'));
       document.getElementById('app').appendChild(napping);
