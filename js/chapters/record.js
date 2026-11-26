@@ -185,9 +185,9 @@
       ${english}
       ${fig(460, 520, 1.7, '#7a5a3a', true)}
       ${fig(740, 520, 1.7, '#9b4a24', true)}
-      <g stroke="${I}" stroke-width="1.5">${[['#9b4a24', 0], ['#4e6b35', 1], ['#6b4a7a', 2], ['#a3271f', 3]].map(([c, i]) => `<rect x="${688 + i * 28}" y="384" width="22" height="22" fill="${c}" fill-opacity=".75"/>`).join('')}</g>
-      ${hand(740, 372, 30, 'they wore color')}
-      ${hand(740, 426, 19, 'russet · green · violet · red', { c: I })}
+      <g stroke="${I}" stroke-width="1.5">${[['#9b4a24', 0], ['#4e6b35', 1], ['#6b4a7a', 2], ['#a3271f', 3]].map(([c, i]) => `<rect x="${704 + i * 28}" y="360" width="22" height="22" fill="${c}" fill-opacity=".75"/>`).join('')}</g>
+      ${hand(756, 348, 30, 'they wore color')}
+      ${hand(756, 404, 19, 'russet · green · violet · red', { c: I })}
       ${hand(345, 452, 24, '≈ 50 English')}
       <g stroke="${I}" stroke-width="2" fill="none"><path d="M330 548H520M330 556H520M346 556V590M504 556V590M340 590L352 560M510 590L498 560"/></g>
       <g stroke="${I}" stroke-width="2"><ellipse cx="420" cy="542" rx="30" ry="8" fill="#e8c890"/><path d="M386 524L454 560M454 524L386 560" stroke="${R}" stroke-width="3.6"/></g>
@@ -199,17 +199,17 @@
         <path d="M584 530Q590 506 600 520Q606 498 614 524" fill="#e0661c" fill-opacity=".45"/>
         ${[576, 600, 624].map((x) => `<path d="M${x} 458V466"/><ellipse cx="${x}" cy="474" rx="7" ry="9" fill="#c98a5a" fill-opacity=".6"/>`).join('')}
       </g>
-      ${hand(600, 432, 28, 'fowl — enough for a week')}
+      ${hand(600, 446, 25, 'fowl — enough for a week')}
       ${[0, 1, 2, 3, 4].map((i) => deer(548 + i * 26, 592, 0.75)).join('')}
       ${hand(600, 640, 24, '5 deer, from the Wampanoag')}
       ${crowd}
-      ${hand(1040, 714, 30, '≈ 90 Wampanoag men, with Massasoit')}
+      ${hand(1004, 698, 30, '≈ 90 Wampanoag men')}${hand(1004, 724, 21, 'with Massasoit', { c: I })}
       <g stroke="${I}" stroke-width="2.2" fill="none" stroke-linecap="round">
-        ${fig(880, 478, 1.15, '#7a5a3a', true)}${fig(926, 472, 1.15, '#4e6b35', true)}
-        <path d="M884 432L912 404M930 426L962 398"/>
-        <circle cx="918" cy="398" r="7" fill="#eadcbf"/><circle cx="926" cy="390" r="9" fill="#eadcbf"/><circle cx="968" cy="392" r="7" fill="#eadcbf"/><circle cx="978" cy="382" r="10" fill="#eadcbf"/>
+        ${fig(900, 478, 1.15, '#7a5a3a', true)}${fig(946, 472, 1.15, '#4e6b35', true)}
+        <path d="M904 432L932 404M950 426L982 398"/>
+        <circle cx="938" cy="398" r="7" fill="#eadcbf"/><circle cx="946" cy="390" r="9" fill="#eadcbf"/><circle cx="988" cy="392" r="7" fill="#eadcbf"/><circle cx="998" cy="382" r="10" fill="#eadcbf"/>
       </g>
-      ${hand(888, 372, 22, '“we exercised our arms”', { c: I })}
+      ${hand(990, 366, 22, '“we exercised our arms”', { c: I })}
       ${hand(900, 512, 28, 'invited? he never says')}
     </svg>`;
   }
@@ -735,6 +735,7 @@
       <path class="rk-crack" d="M300 96L294 104L304 110L296 118L302 126" stroke="#a3271f" stroke-width="2.5" fill="none" opacity="0"/>
       <g font-family="${FELL}" font-style="italic" font-size="20" fill="#9d927c"><text x="40" y="180">1621</text><text x="560" y="180" text-anchor="end">1675</text></g>
     </svg>`);
+    box.style.aspectRatio = '600 / 220';
     const l = box.querySelector('.rk-l'), r = box.querySelector('.rk-r'), crack = box.querySelector('.rk-crack');
     return {
       progress(p) {
@@ -786,7 +787,7 @@
         <path d="M238 282V296M246 284V296M258 284V296M266 282V296" stroke="#2a2420" stroke-width="3" stroke-linecap="round"/>
       </g>
       <g class="rh-envs">${pres.map((_, i) => `<g data-i="${i}" opacity="0"><rect x="-10" y="-7" width="20" height="14" fill="#efe6d2" stroke="#8a7a62"/><path d="M-10 -7L0 1L10 -7" fill="none" stroke="#8a7a62"/></g>`).join('')}</g>
-      <text class="rh-cap" x="300" y="304" text-anchor="middle" font-family="${FELL}" font-style="italic" font-size="17" fill="#cfc3a9"></text>
+      <text class="rh-cap" x="22" y="32" text-anchor="start" font-family="${FELL}" font-style="italic" font-size="17" fill="#cfc3a9"></text>
     </svg>`);
     const stack = Array.from(box.querySelectorAll('.rh-stack rect'));
     const envs = Array.from(box.querySelectorAll('.rh-envs g'));
@@ -853,7 +854,7 @@
       <defs><linearGradient id="rec-bk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#25324c"/><stop offset="1" stop-color="#6f86a8"/></linearGradient></defs>
       <rect width="600" height="320" fill="url(#rec-bk)"/>
       ${city}
-      <g class="rb-parade">${B.map((b, i) => `<g class="rb" data-i="${i}" tabindex="0" role="button" aria-label="Let the ${b.label} balloon go"><g class="rb-rise"><g class="rb-float" style="animation-delay:${i * -1.1}s"><path d="M${b.x} ${b.y + 34}Q${b.x + 8} ${b.y + 110} ${b.x} 274" stroke="#efe6d2" stroke-width="1.2" fill="none" opacity=".55"/>${b.shape}</g></g>${handlers(b.x)}</g>`).join('')}</g>
+      <g class="rb-parade">${B.map((b, i) => `<g class="rb" data-i="${i}" tabindex="0" role="button" aria-label="Let the ${b.label} balloon go"><g class="rb-rise"><g class="rb-float" style="animation-delay:${i * -1.1}s"><circle cx="${b.x}" cy="${b.y + 6}" r="62" fill="transparent"/><path d="M${b.x} ${b.y + 34}Q${b.x + 8} ${b.y + 110} ${b.x} 274" stroke="#efe6d2" stroke-width="1.2" fill="none" opacity=".55"/>${b.shape}</g></g>${handlers(b.x)}</g>`).join('')}</g>
     </svg>`);
     const parade = box.querySelector('.rb-parade');
     const bs = Array.from(box.querySelectorAll('.rb'));
@@ -939,7 +940,7 @@
         'One of them, Tisquantum, the man the English called Squanto, got free, reached England, learned English, and spent years trying to get home. In 1619 he finally stood at Patuxet again.',
         '<strong>There was no one there.</strong>'] },
     { id: 'dying', year: 1616, label: 'The Great Dying', when: '1616–1619', title: 'The Great Dying', art: artLights, tall: 1.9,
-      mood: { level: 0.06, cello: 0, dark: 0.78, radius: 360 }, enterSfx: 'bell',
+      mood: { level: 0.06, cello: 0, dark: 0.62, radius: 520 }, enterSfx: 'bell',
       body: ['Between 1616 and 1619 an epidemic tore through the coastal nations, most likely carried by European sailors and traders. Historians still argue about what it was. In some communities it killed as many as nine people in ten.',
         'Here are a hundred lights.',
         'When the Mayflower arrived, the fields of Patuxet were already cleared, and empty. The English called the place Plymouth.'] },
@@ -1193,12 +1194,10 @@
         el('div', { class: 'rec-arrow', 'aria-hidden': 'true' }, '↓'));
       const reel = buildReel(api);
       root.append(intro, postcard, bridge, reel.el);
-      let dirty = true;
-      api.on(root, 'scroll', () => { dirty = true; }, { passive: true });
-      api.on(window, 'resize', () => { reel.resize(); dirty = true; });
+      api.on(window, 'resize', () => reel.resize());
       api.timeout(() => reel.resize(), 300);
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => api.alive && reel.resize());
-      api.frame((dt) => { reel.update(dt); dirty = false; });
+      api.frame((dt) => reel.update(dt));
     },
   });
 })();
