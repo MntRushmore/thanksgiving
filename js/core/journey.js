@@ -236,6 +236,9 @@
           try { act.build && act.build(act.group, W); } catch (e) { console.error('act build', act.id, e); }
         });
         J.built = true;
+        // compile every act's shaders now, so crossing into an act never stutters
+        try { J.acts.forEach((x) => { if (x.group) x.group.visible = true; }); W.renderer.compile(W.scene, W.camera); } catch (e) { console.warn('precompile', e); }
+        J.acts.forEach((x) => { if (x.group) x.group.visible = false; });
       }
       const cap = el('div', { class: 'jr-cap' });
       const actLbl = el('div', { class: 'jr-actlbl' });
