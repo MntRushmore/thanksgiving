@@ -205,7 +205,7 @@ button { font: inherit; color: inherit; }
 .match { position: fixed; z-index: 40; width: 74px; height: 12px; pointer-events: none; transform-origin: 8px 50%; }
 .prelude .enter { opacity: 0; transform: translateY(10px); transition: opacity 1.2s var(--ease-out), transform 1.2s var(--ease-out); pointer-events: none; }
 .prelude .enter.on { opacity: 1; transform: none; pointer-events: auto; }
-.prelude .skip { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); font-family: var(--f-ui); font-size: var(--step--2); color: var(--linen-3); background: none; border: 0; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; }
+.prelude .skip { z-index: 10; position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); font-family: var(--f-ui); font-size: var(--step--2); color: var(--linen-3); background: none; border: 0; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; }
 .prelude .skip:hover { opacity: 1; color: var(--linen); }
 
 /* ---------- bill of fare ---------- */
@@ -258,3 +258,18 @@ button { font: inherit; color: inherit; }
 .prelude.in3d .below { position: relative; }
 .prelude.in3d .below::before { content: ""; position: absolute; left: 50%; top: 50%; width: min(720px, 120vw); height: 260px; transform: translate(-50%, -50%); z-index: -1; pointer-events: none;
   background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(5, 4, 3, 0.85), rgba(5, 4, 3, 0.5) 55%, rgba(5, 4, 3, 0) 80%); }
+
+/* the cold open: a very cheerful e-card, briefly */
+.ecard { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); background: #1b1530; transition: background 1.2s ease, opacity 0.9s ease; }
+.ecard.burning, .ecard:has(.ecard-note.gone) { background: #050403; }
+.ecard.gone { opacity: 0; pointer-events: none; }
+.ecard-cv { width: min(640px, 92vw); aspect-ratio: 640 / 420; height: auto; display: block; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6); border-radius: 4px; }
+.ecard.dance .ecard-cv { animation: ecard-dance 0.25s ease-in-out infinite alternate; }
+@keyframes ecard-dance { from { transform: rotate(-1.5deg) scale(1.01); } to { transform: rotate(1.5deg) scale(0.99); } }
+.ecard-note { margin: 0; font-family: "Comic Sans MS", "Chalkboard SE", "Trebuchet MS", sans-serif; font-size: clamp(18px, 3vw, 26px); color: #ffe066; text-shadow: 2px 2px 0 #c2185b; transition: opacity 0.8s; min-height: 1.3em; text-align: center; }
+.ecard-note.flat { font-family: var(--f-display); font-style: italic; color: var(--linen); text-shadow: none; font-size: var(--step-2); }
+.ecard-note.gone { opacity: 0; }
+.ecard-btn { font-family: "Comic Sans MS", "Chalkboard SE", "Trebuchet MS", sans-serif; font-weight: 700; font-size: 20px; color: #fff; background: linear-gradient(#ff7ac6, #c2185b); border: 3px solid #fff; border-radius: 999px; padding: 12px 26px; cursor: pointer; box-shadow: 0 6px 0 #6a1b4d, 0 12px 24px rgba(0, 0, 0, 0.4); animation: ecard-pulse 1s ease-in-out infinite; }
+.ecard-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #6a1b4d; }
+@keyframes ecard-pulse { 50% { transform: scale(1.06); } }
+.ecard-skip { position: absolute; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); background: none; border: 0; color: rgba(255, 255, 255, 0.45); font-family: var(--f-ui); letter-spacing: 0.12em; text-transform: uppercase; font-size: 12px; cursor: pointer; }

@@ -1,0 +1,9 @@
+/* Act V: the night */
+.jr-credits { pointer-events: none; display: flex; justify-content: center; align-items: flex-start; overflow-y: auto; padding: calc(env(safe-area-inset-top, 0px) + 80px) max(16px, env(safe-area-inset-right, 0px)) 130px max(16px, env(safe-area-inset-left, 0px)); background: radial-gradient(ellipse 60% 70% at 50% 40%, rgba(6, 4, 3, 0.78), rgba(6, 4, 3, 0.35) 70%, rgba(6, 4, 3, 0)); }
+.jr-credits-in { pointer-events: auto; max-width: 560px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--linen-2); font-family: var(--f-body); animation: jr-fade 2s var(--ease-out) both; }
+.jr-credits-in p { margin: 0; text-wrap: balance; text-shadow: 0 2px 12px #000; }
+.jr-credits-in .lt-display { font-size: var(--step-4); color: var(--linen); }
+.jr-credit-btns { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 10px; }
+.jr-sources { margin-top: 10px; text-align: left; font-size: var(--step--1); color: var(--linen-3); }
+.jr-sources summary { cursor: pointer; font-family: var(--f-sc); letter-spacing: 0.14em; color: var(--lemon); text-align: center; }
+.jr-sources ul { padding-left: 1.1em; line-height: 1.5; }

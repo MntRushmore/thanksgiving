@@ -70,6 +70,24 @@
       const skip = el('button', { class: 'skip', type: 'button' }, 'Skip intro');
       const stage = el('div', { class: 'stage' }, canvas, below);
       root.append(stage, title, skip);
+      // the cold open: a terrible e-card, once per visit
+      if (LT.ecard && !LT._cardSeen) {
+        LT._cardSeen = true;
+        stage.style.visibility = 'hidden';
+        if (in3d) W.show(false, { dur: 0 });
+        LT.light.set({ darkness: 0, radius: 3000, instant: true });
+        LT.ecard(root, api).then(() => {
+          if (!api.alive) return;
+          hint.firstChild.textContent = 'Let\u2019s do this properly. Strike a match.';
+          stage.style.visibility = '';
+          if (in3d) W.show(true, { dur: 0.1 });
+          stage.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1600, easing: 'ease-out' });
+          LT.light.set({ darkness: 0.97, radius: 120, instant: true });
+          const r = box.getBoundingClientRect();
+          LT.light.moveTo(r.left + r.width / 2, r.top + r.height / 2, true);
+          box.focus({ preventScroll: true });
+        });
+      }
 
       const candle = in3d ? null : LT.candle(canvas, { lit: false });
       if (candle) api.cleanup(() => candle.destroy());

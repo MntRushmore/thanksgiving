@@ -37,6 +37,11 @@
       next() { LT.next(); },
       go(id, o) { LT.go(id, o); },
       nextButton(label) {
+        if (LT.journey && LT.journey.resumeAt != null && def.id !== 'journey') {
+          const t = el('span', { class: 't' }); t.append('Back to the ', el('i', null, 'journey'));
+          return el('button', { class: 'lt-next', type: 'button', on: { click: () => { LT.audio.sfx('clink'); LT.go('journey'); } } },
+            el('span', { class: 'k' }, 'Second helping finished'), t, el('span', { class: 'a', 'aria-hidden': 'true' }, '\u2192'));
+        }
         const nx = nextCourse(def);
         if (!nx) {
           const b = el('button', { class: 'lt-next', type: 'button', on: { click: () => LT.go('menu') } },
@@ -267,7 +272,10 @@
       ol,
       el('div', { class: 'rule', 'aria-hidden': 'true' }, '✣'),
       el('p', { class: 'foot' }, 'Served by candlelight. Seconds encouraged. Guests: you, and everyone who made this meal possible.'),
-      opts.begin && first ? el('div', { class: 'begin' }, el('button', { class: 'lt-btn lt-btn--ink', type: 'button', on: { click: () => { LT.audio.sfx('clink'); LT.go(first.id); } } }, LT.state.visited.length ? 'Pick up where you left off' : 'Begin with the first course')) : null,
+      LT.world.ok && chapters.journey ? el('div', { class: 'begin journey-cta' },
+        el('button', { class: 'lt-btn lt-btn--ink', type: 'button', on: { click: () => { LT.audio.sfx('clink'); LT.go('journey'); } } }, LT.journey && LT.journey.i > 0 ? 'Back to the long table' : 'Walk the long table'),
+        el('p', { class: 'foot' }, 'All five courses as one journey, 1621 to tonight. Or pick a single course above for second helpings.')) : null,
+      opts.begin && first && !(LT.world.ok && chapters.journey) ? el('div', { class: 'begin' }, el('button', { class: 'lt-btn lt-btn--ink', type: 'button', on: { click: () => { LT.audio.sfx('clink'); LT.go(first.id); } } }, LT.state.visited.length ? 'Pick up where you left off' : 'Begin with the first course')) : null,
       nEggs ? el('div', { class: 'secrets' }, `Secrets found: ${nEggs}`) : null);
     return card;
   };
@@ -375,6 +383,8 @@
   app.afterPrelude = () => {
     const r = LT.requested;
     LT.requested = '';
-    LT.go(r && chapters[r] && r !== 'prelude' ? r : 'menu');
+    if (r && chapters[r] && r !== 'prelude') return LT.go(r);
+    // with a real room to walk through, the journey is the way in; otherwise the bill of fare
+    LT.go(LT.world.ok && chapters.journey ? 'journey' : 'menu', { transition: 'cut' });
   };
 })();

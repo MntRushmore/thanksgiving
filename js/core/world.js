@@ -22,7 +22,7 @@
   const TOP = 0.76;            // table height (m)
   const HALF = 0.6;            // half table width
   const NEAR_END = 0.95;       // the head of the table (z)
-  const FAR_END = -44;         // where the table stops (in the dark, nobody will ever see it)
+  const FAR_END = -150.2;      // the dressed table runs back to about 1640; the act that visits 1621 builds the rest
   const SEAT = 0.78;           // spacing between seats
   const LOW = U.isTouch || Math.min(screen.width, screen.height) < 600;
 
@@ -55,7 +55,7 @@
       for (let i = 0; i < h; i += 3) { x.fillStyle = `rgba(0,0,0,${rnd() * 0.12})`; x.fillRect(0, i, w, 1); }
       [[14, 6], [28, 2], [w - 20, 6], [w - 30, 2]].forEach(([px, pw]) => { x.fillStyle = '#c9963a'; x.fillRect(px, 0, pw, h); });
       for (let i = 0; i < 1500; i++) { x.fillStyle = `rgba(255,200,150,${rnd() * 0.05})`; x.fillRect(rnd() * w, rnd() * h, 2, 1); }
-    }, [1, 24]);
+    }, [1, 86]);
   }
   function woodTex() {
     return canvasTex(512, 512, (x, w, h) => {
@@ -384,8 +384,8 @@
     mats.herb = new T.MeshStandardMaterial({ color: '#3f5a26', roughness: 0.7 });
 
     // floor and the table
-    const floor = new T.Mesh(new T.PlaneGeometry(14, 70), mats.floor);
-    floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, -20); floor.receiveShadow = true; scene.add(floor);
+    const floor = new T.Mesh(new T.PlaneGeometry(14, 156), mats.floor);
+    floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, -76); floor.receiveShadow = true; scene.add(floor);
     const [clothG, endG] = clothGeo();
     const cloth = new T.Mesh(clothG, mats.linen); cloth.receiveShadow = true; cloth.castShadow = false; scene.add(cloth);
     const endCloth = new T.Mesh(endG, mats.linen); endCloth.receiveShadow = true; scene.add(endCloth);
@@ -448,6 +448,7 @@
       candles.push({ pos: v3(0, TOP + 0.232 + h + 0.012, z), lit: 0, target: 0, idx: candles.length });
     }
     scene.add(instanced(stickG, mats.pewter, sticks));
+    R.stickG = stickG; R.candleG = candleG;
     R.waxMesh = instanced(candleG, mats.wax, waxes); scene.add(R.waxMesh);
     R.waxList = waxes;
 
@@ -541,6 +542,46 @@
     cursorTarget = new T.Object3D(); scene.add(cursorTarget); cursorLight.target = cursorTarget;
     cursorLight.castShadow = true; cursorLight.shadow.mapSize.set(LOW ? 512 : 1024, LOW ? 512 : 1024); cursorLight.shadow.bias = -0.0008; cursorLight.shadow.camera.near = 0.05; cursorLight.shadow.camera.far = 4;
     scene.add(cursorLight);
+
+    // a sky, for when the walls fall away
+    const skyU = { uAmount: { value: 0 }, uTime: fu.uTime };
+    const sky = new T.Mesh(new T.SphereGeometry(600, 48, 24), new T.ShaderMaterial({
+      uniforms: skyU, side: T.BackSide, depthWrite: false, fog: false,
+      vertexShader: 'varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: `uniform float uAmount, uTime; varying vec3 vDir;
+        float h(vec3 p){ return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }
+        void main(){
+          if (uAmount < 0.002) discard;
+          vec3 d = normalize(vDir);
+          float horizon = smoothstep(-0.05, 0.25, d.y);
+          vec3 col = mix(vec3(0.03, 0.035, 0.06), vec3(0.004, 0.006, 0.016), horizon);
+          col += vec3(0.08, 0.05, 0.03) * pow(1.0 - abs(d.y), 8.0);
+          float band = exp(-pow(dot(d, normalize(vec3(0.3, 0.6, -0.75))) * 3.2, 2.0));
+          col += vec3(0.05, 0.05, 0.08) * band * horizon;
+          vec3 p = d * 220.0; vec3 c = floor(p); vec3 f = fract(p) - 0.5;
+          float r = h(c);
+          if (r > 0.965) {
+            vec3 o = vec3(h(c + 1.3), h(c + 2.7), h(c + 4.1)) - 0.5;
+            float s = smoothstep(0.09 + 0.12 * (r - 0.965) * 25.0, 0.0, length(f - o * 0.6));
+            float tw = 0.6 + 0.4 * sin(uTime * (1.0 + r * 5.0) + r * 60.0);
+            col += vec3(1.0, 0.95, 0.85) * s * tw * (0.6 + band * 1.5) * horizon * 2.2;
+          }
+          gl_FragColor = vec4(col * uAmount, 1.0);
+        }`,
+    }));
+    sky.renderOrder = -10; sky.frustumCulled = false; scene.add(sky);
+    R.skyU = skyU; R.sky = sky;
+
+    // spare candles any act can place (a seat candle, a candle on a hill)
+    const XN = 96, xp = new Float32Array(XN * 3), xs = new Float32Array(XN), xl = new Float32Array(XN), xz = new Float32Array(XN).fill(0.05);
+    for (let i = 0; i < XN; i++) { xs[i] = rnd(); xp[i * 3 + 1] = -100; }
+    const xg = new T.BufferGeometry();
+    xg.setAttribute('position', new T.BufferAttribute(xp, 3)); xg.setAttribute('aSeed', new T.BufferAttribute(xs, 1));
+    xg.setAttribute('aLit', new T.BufferAttribute(xl, 1)); xg.setAttribute('aSize', new T.BufferAttribute(xz, 1));
+    const xf = new T.Points(xg, flames.material); xf.frustumCulled = false; scene.add(xf);
+    const xhg = xg.clone(); xhg.setAttribute('aLit', xg.attributes.aLit); xhg.setAttribute('aSize', new T.BufferAttribute(new Float32Array(XN).fill(0.8), 1));
+    const xh = new T.Points(xhg, halos.material); xh.frustumCulled = false; scene.add(xh);
+    R.extra = { geo: xg, halo: xhg, n: 0, max: XN, list: [] };
   }
 
   function buildFeast(envMap, plateG, glassG) {
@@ -752,6 +793,72 @@
     R.waxMesh.instanceMatrix.needsUpdate = true; flames.geometry.attributes.position.needsUpdate = true;
   };
 
+  /* ================= tools for the acts ================= */
+  W.T = T; W.TOP = TOP; W.HALF = HALF; W.SEAT = SEAT; W.NEAR_END = NEAR_END; W.FAR_END = FAR_END; W.LOW = LOW;
+  W.mats = mats; W.lathe = lathe; W.merge = merge; W.box = box; W.instanced = instanced; W.canvasTex = canvasTex; W.cardTex = cardTex;
+  W.candles = candles;
+  W.rnd = rnd;
+  /** where a year sits on the table: one seat per year, 2026 at the head */
+  W.yearPos = (year) => {
+    const i = Math.max(0, 2026 - year), row = Math.floor(i / 2), side = i % 2 ? 1 : -1;
+    return { x: side * 0.36, z: 0.15 - row * SEAT, side, z0: 0.15 - (i / 2) * SEAT };
+  };
+  W.zOfYear = (year) => 0.15 - ((2026 - year) / 2) * SEAT;
+  const hooks = new Set();
+  W.onFrame = (fn) => { hooks.add(fn); return () => hooks.delete(fn); };
+  /** screen position of a world point: {x, y, on} */
+  W.project = (v) => {
+    const p = (v.isVector3 ? v.clone() : v3(v[0], v[1], v[2])).project(camera);
+    return { x: (p.x * 0.5 + 0.5) * innerWidth, y: (-p.y * 0.5 + 0.5) * innerHeight, on: p.z < 1 && p.z > -1 && Math.abs(p.x) < 1.2 && Math.abs(p.y) < 1.2 };
+  };
+  W.cursorHit = () => hit.clone();
+  W.cursorRay = () => ray;
+  W.camState = () => ({ pos: cam.pos.clone(), look: cam.look.clone(), fov: cam.fov });
+  /** fly the camera along a path of positions (and look targets) */
+  W.fly = function (o) {
+    if (cam.tween) cam.tween.cancel();
+    const P = new T.CatmullRomCurve3(o.points.map((p) => (p.isVector3 ? p : v3(...p))), false, 'centripetal');
+    const L = new T.CatmullRomCurve3(o.looks.map((p) => (p.isVector3 ? p : v3(...p))), false, 'centripetal');
+    const f0 = cam.fov, f1 = o.fov ?? cam.fov;
+    cam.name = 'flight'; W.shotName = 'flight';
+    cam.tween = U.tween({ from: 0, to: 1, dur: U.reducedMotion ? Math.min(1, o.dur) : o.dur, ease: o.ease || 'inOutSine', onUpdate: (k) => {
+      cam.pos.copy(P.getPointAt(k)); cam.look.copy(L.getPointAt(k)); cam.fov = U.lerp(f0, f1, k); o.onUpdate && o.onUpdate(k);
+    } });
+    return cam.tween.done;
+  };
+  const env = { sky: 0, skyT: 0, fog: 0.09, fogT: 0.09, exposure: 0.95, exposureT: 0.95, bloom: 0.62, bloomT: 0.62, floor: 1 };
+  W.sky = (v) => { env.skyT = v; };
+  W.fog = (v) => { env.fogT = v; };
+  W.post = (o = {}) => { if (o.exposure != null) env.exposureT = o.exposure; if (o.bloom != null) env.bloomT = o.bloom; };
+  W.floor = (on) => { scene.children.forEach((c) => { if (c.material === mats.floor) c.visible = on; }); };
+  /** a spare candle flame (bring your own candlestick) */
+  W.addFlame = (pos, o = {}) => {
+    const X = R.extra;
+    if (X.n >= X.max) return null;
+    const i = X.n++;
+    const p = pos.isVector3 ? pos.clone() : v3(...pos);
+    X.geo.attributes.position.setXYZ(i, p.x, p.y, p.z); X.geo.attributes.position.needsUpdate = true;
+    X.halo.attributes.position.setXYZ(i, p.x, p.y, p.z); X.halo.attributes.position.needsUpdate = true;
+    if (o.size) { X.geo.attributes.aSize.setX(i, o.size); X.geo.attributes.aSize.needsUpdate = true; }
+    const f = { i, lit: 0, target: 0, pos: p,
+      light() { f.target = 1; return f; }, out() { f.target = 0; return f; },
+      move(q) { f.pos.copy(q.isVector3 ? q : v3(...q)); X.geo.attributes.position.setXYZ(i, f.pos.x, f.pos.y, f.pos.z); X.halo.attributes.position.setXYZ(i, f.pos.x, f.pos.y, f.pos.z); X.geo.attributes.position.needsUpdate = X.halo.attributes.position.needsUpdate = true; } };
+    X.list.push(f);
+    return f;
+  };
+  /** a pewter candlestick with a candle, flame included; returns {group, flame} */
+  W.makeCandle = (parent, pos, o = {}) => {
+    const g = new T.Group(); g.position.copy(pos.isVector3 ? pos : v3(...pos));
+    const h = o.height ?? 0.18, sc = o.scale ?? 0.7;
+    const stick = new T.Mesh(R.stickG, mats.pewter); stick.scale.setScalar(sc); stick.castShadow = true; g.add(stick);
+    const c = new T.Mesh(R.candleG, mats.wax); c.position.y = 0.232 * sc; c.scale.set(sc, h, sc); c.castShadow = true; g.add(c);
+    (parent || scene).add(g);
+    g.updateMatrixWorld(true);
+    const tip = v3(0, 0.232 * sc + h + 0.01, 0).applyMatrix4(g.matrixWorld);
+    const flame = W.addFlame(tip, { size: 0.045 * (sc / 0.7) });
+    return { group: g, flame };
+  };
+
   /* ================= state, visibility ================= */
   const look = { dim: 1, dimT: 1, soft: 0, softT: 0, cursor: 0, cursorT: 0, moon: 0, moonT: 0, ambient: 0.06, fade: 1 };
   W.mood = (o = {}) => {
@@ -798,6 +905,16 @@
     look.dim += (look.dimT - look.dim) * k; look.soft += (look.softT - look.soft) * k;
     look.cursor += (look.cursorT - look.cursor) * k; look.moon += (look.moonT - look.moon) * k;
     R.flameU.uTime.value = t;
+    env.sky += (env.skyT - env.sky) * k; env.fog += (env.fogT - env.fog) * k;
+    env.exposure += (env.exposureT - env.exposure) * k; env.bloom += (env.bloomT - env.bloom) * k;
+    R.skyU.uAmount.value = env.sky; R.sky.visible = env.sky > 0.002; scene.fog.density = env.fog;
+    M.comp.uniforms.uExposure.value = env.exposure; M.comp.uniforms.uBloom.value = env.bloom;
+    const X = R.extra;
+    if (X.list.length) {
+      X.list.forEach((f) => { f.lit += (f.target - f.lit) * Math.min(1, dt * (f.target > f.lit ? 4 : 6)); X.geo.attributes.aLit.array[f.i] = f.lit; });
+      X.geo.attributes.aLit.needsUpdate = true;
+    }
+    hooks.forEach((fn) => { try { fn(dt, t, raw); } catch (e) { console.warn('world hook', e); hooks.delete(fn); } });
 
     // candles flicker toward their targets
     const lit = flames.geometry.attributes.aLit;
@@ -880,7 +997,7 @@
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = T.PCFSoftShadowMap;
       maxPr = pr = Math.min(window.devicePixelRatio || 1, LOW ? 1 : 1.5);
-      camera = new T.PerspectiveCamera(30, innerWidth / innerHeight, 0.02, 80);
+      camera = new T.PerspectiveCamera(30, innerWidth / innerHeight, 0.02, 900);
       clock = new T.Clock();
       buildRoom();
       buildPost();
