@@ -124,12 +124,13 @@
   let last = performance.now();
   let running = false;
   function tick(now) {
-    let dt = (now - last) / 1000;
+    const raw = Math.min(0.25, (now - last) / 1000);
+    let dt = raw;
     last = now;
     if (dt > 0.05) dt = 0.05;
     const t = now / 1000;
     for (const fn of Array.from(loopFns)) {
-      try { fn(dt, t); } catch (e) { console.error(e); loopFns.delete(fn); }
+      try { fn(dt, t, raw); } catch (e) { console.error(e); loopFns.delete(fn); }
     }
     requestAnimationFrame(tick);
   }
@@ -149,9 +150,9 @@
     let t = -(o.delay || 0), cancelled = false, resolve;
     const done = new Promise((r) => (resolve = r));
     const isArr = Array.isArray(from);
-    const off = LT.loop.add((dt) => {
+    const off = LT.loop.add((dt, _t, raw) => {
       if (cancelled) return;
-      t += dt;
+      t += raw; // tweens keep wall-clock time, even when frames are slow
       if (t < 0) return;
       const k = U.clamp(t / dur, 0, 1), e = ease(k);
       const v = isArr ? from.map((f, i) => f + (to[i] - f) * e) : from + (to - from) * e;

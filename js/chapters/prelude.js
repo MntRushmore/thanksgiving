@@ -45,8 +45,11 @@
   LT.chapter({
     id: 'prelude', index: 0, title: 'Prelude', music: null, transition: 'cut',
     light: { darkness: 0.97, radius: 120 },
+    world: { shot: 'dark', dur: 0, mood: { cursor: 0, dim: 1, soft: 0, moon: 0, instant: true } },
     mount(root, api) {
       root.classList.add('prelude');
+      const W = LT.world, in3d = !!W.ok;
+      if (in3d) { W.reset(); root.classList.add('in3d'); }
       const title = el('div', { class: 'title' });
       const h1 = el('h1', { 'aria-label': 'The Long Table' });
       h1.appendChild(el('span', { class: 'the l' }, 'The'));
@@ -68,8 +71,9 @@
       const stage = el('div', { class: 'stage' }, canvas, below);
       root.append(stage, title, skip);
 
-      const candle = LT.candle(canvas, { lit: false });
-      api.cleanup(() => candle.destroy());
+      const candle = in3d ? null : LT.candle(canvas, { lit: false });
+      if (candle) api.cleanup(() => candle.destroy());
+      const flamePos = () => (in3d ? Object.assign({ s: 1 }, W.hero.screenPos()) : candle.flamePos());
 
       // Light the matchbox a little so it can be found.
       api.timeout(() => {
@@ -107,16 +111,16 @@
         LT.light.moveTo(hx, hy, true);
         hint.style.opacity = 0; box.style.transition = 'opacity .8s'; box.style.opacity = 0;
         await api.wait(fast ? 100 : 650);
-        const fp = candle.flamePos();
-        const tx = fp.x - 2, ty = fp.y + 22 * fp.s;
+        const fp = flamePos();
+        const tx = fp.x - 2, ty = fp.y + (in3d ? 6 : 22 * fp.s);
         await U.tween({ from: [hx, hy, -8], to: [tx, ty, -58], dur: fast ? 0.3 : 1.15, ease: 'inOutCubic', onUpdate: ([x, y, rot]) => { place(x, y, rot); LT.light.moveTo(x, y + 4, true); } }).done;
         if (!api.alive) return;
         await api.wait(fast ? 50 : 380);
-        candle.light();
+        if (in3d) { W.hero.light(); W.mood({ cursor: 0.12 }); } else candle.light();
         LT.audio.sfx('whoomp');
         LT.fx.sparks(tx, ty - 10, 18, { speed: [60, 240] });
         LT.light.pulse();
-        LT.light.set({ darkness: 0.9, radius: 330 });
+        LT.light.set(in3d ? { darkness: 0.42, radius: 520 } : { darkness: 0.9, radius: 330 });
         LT.light.moveTo(tx, ty - 30);
         LT.music.play('prelude', 4);
         // shake the match out
@@ -127,7 +131,15 @@
         m.animate([{ transform: 'rotate(-58deg)', opacity: 1 }, { transform: 'translate(40px, 160px) rotate(40deg)', opacity: 0 }], { duration: 1100, easing: 'cubic-bezier(.5,0,.8,.6)', fill: 'forwards' });
         // the title
         await api.wait(300);
-        LT.light.set({ darkness: 0.74, radius: 560 });
+        LT.light.set(in3d ? { darkness: 0.25, radius: 900 } : { darkness: 0.74, radius: 560 });
+        if (in3d) {
+          // the reveal: pull back, and the long table lights itself, all the way down
+          W.shot('reveal', { dur: U.reducedMotion ? 0.5 : 8.5, ease: 'inOutSine', lift: 0.1 });
+          W.ignite({ delay: 1300, gap: 0.12 });
+          W.mood({ cursor: 0.55 });
+          LT.audio.sfx('swell', { dur: 3.2, g: 0.1 });
+          api.timeout(() => LT.audio.sfx('bell', { n: 50, g: 0.08, decay: 8 }), 1800);
+        }
         h1.querySelector('.the').classList.add('on');
         for (let i = 0; i < letters.length; i++) { await api.wait(85); letters[i].classList.add('on'); }
         title.classList.add('on');
@@ -140,7 +152,11 @@
         LT.fx.embers(1.5);
       }
       api.on(box, 'click', () => strike(false));
-      api.on(skip, 'click', () => { LT.audio.init(); candle.light(); LT.music.play('prelude', 1); LT.app.afterPrelude(); });
+      api.on(skip, 'click', () => {
+        LT.audio.init();
+        if (in3d) { W.hero.light(); W.setCandles(1); W.shot('reveal', { dur: 0 }); } else candle.light();
+        LT.music.play('prelude', 1); LT.app.afterPrelude();
+      });
       api.on(enter, 'click', () => { LT.audio.sfx('clink'); LT.app.afterPrelude(); });
       // Any key strikes too (once you've found the box, the dark is optional).
       api.on(window, 'keydown', (e) => { if (!struck && (e.key === 'Enter' || e.key === ' ') && document.activeElement !== box) { e.preventDefault(); strike(false); } });

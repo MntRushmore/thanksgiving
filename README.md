@@ -3,9 +3,15 @@
 An interactive Thanksgiving in five courses: the history, the food, the chaos of the
 family table, and what gratitude actually is.
 
-You start in the dark and strike a match. Your cursor is the candle for the rest of the
-night: the page is dark, and wherever you point is lit. That's the whole idea of the
-piece. **Gratitude is a kind of attention. It's where you choose to hold the light.**
+You start in the dark and strike a match. It lights a real candle in a real 3D room, and
+the camera pulls back as every candle down a table that never ends catches, one after
+another, into the dark. Your cursor carries a light across the table for the rest of the
+night; shadows of glasses and candlesticks swing away from it. That's the whole idea of
+the piece. **Gratitude is a kind of attention. It's where you choose to hold the light.**
+
+Between courses the camera walks you further down the long table. At the end of the
+night you blow out your candle, and your breath travels the length of the table, putting
+out every candle on it.
 
 | Course | | |
 |---|---|---|
@@ -45,6 +51,13 @@ node tools/build.mjs
   (`js/core/music.js`): a lament in D minor for the history, a swing for the food, a
   polka whose tempo is tied to family tension, rolling piano and a choir for grace, a
   music-box lullaby for the leftovers.
+- **The room is built from code too** (`js/core/world.js`, on Three.js r128): a 45-metre
+  table with a draped linen cloth, 110 place settings, pewter candlesticks, a roast turkey,
+  pumpkins and a half-peeled lemon whose rind hangs over the edge, all procedural geometry
+  and canvas-drawn textures. Candle flames are shader sprites; light pools, dust in the
+  light, real shadows from the light you carry, and a custom HDR bloom, grain and
+  vignette pass. It scales its resolution to your device, pauses when a course covers
+  it, and if WebGL isn't available the whole piece falls back to its 2D version.
 - **Every picture is drawn in code**: SVG for the family and the props, canvas for the
   candle flame, particles, the night sky.
 - **The look** is a Dutch Golden Age still life (umber dark, chiaroscuro, pewter, a lemon
@@ -57,7 +70,7 @@ node tools/build.mjs
 index.html            entry point (loads everything in order)
 css/core.css          tokens, chrome, transitions, shared components
 css/<course>.css      one stylesheet per course
-js/core/              util, audio, music, fx (particles + candle-light), candle,
+js/core/              util, audio, music, fx (particles + candle-light), candle, world (the 3D room),
                       family (the cast, drawn in SVG), app (router, veil, menu,
                       toasts, secrets, state), eggs (global secrets), boot
 js/chapters/          prelude, menu, record, spread, table, grace, leftovers

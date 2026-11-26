@@ -68,12 +68,24 @@
     } catch (e) { /* sandboxed frames may refuse; it's only a convenience */ }
   }
 
-  function mount(def) {
+  function mount(def, opts = {}) {
     const root = el('section', { class: `chapter chapter--${def.id}`, 'aria-label': def.title || def.id });
+    if (opts.fadeIn) root.style.opacity = '0';
     document.getElementById('stage').appendChild(root);
     const api = makeApi(def, root);
     current = { def, root, api };
-    LT.light.set(Object.assign({ darkness: 0.55, radius: 420, warmth: 1 }, def.light || {}));
+    const wd = def.world;
+    const onWorld = !!(LT.world.ok && wd && wd.visible !== false);
+    LT.light.set(Object.assign({ darkness: 0.55, radius: 420, warmth: 1 }, def.light || {}, onWorld && wd.light ? wd.light : {}));
+    if (LT.world.ok) {
+      if (LT.state.chair) LT.world.setChair(LT.state.chair);
+      if (onWorld) {
+        root.classList.add('on-world');
+        LT.world.show(true);
+        LT.world.mood(Object.assign({ dim: 1, soft: 0, cursor: 0, moon: 0 }, wd.mood || {}));
+        if (wd.shot && LT.world.shotName !== wd.shot) LT.world.shot(wd.shot, { dur: wd.dur ?? 1.8 });
+      } else if (!opts.fadeIn) LT.world.show(false);
+    }
     if (def.music) LT.music.play(def.music);
     let extra;
     try { extra = def.mount(root, api); } catch (e) { console.error('mount failed', def.id, e); root.appendChild(el('div', { class: 'lt-center' }, el('p', { class: 'lt-prose' }, 'Something spilled in this course. Try the next one.'), api.nextButton())); }
@@ -99,11 +111,12 @@
     if (!def || busy) return;
     busy = true;
     closeMenu(true);
-    const kind = opts.transition || def.transition || 'candle';
+    let kind = opts.transition || def.transition || 'candle';
+    if (LT.world.ok && kind !== 'cut' && !opts.transition && current && current.def.id !== 'prelude') kind = 'glide';
     try {
       await veilClose(kind, def);
       unmount();
-      mount(def);
+      mount(def, { fadeIn: kind === 'glide' });
       await U.wait(kind === 'cut' ? 0 : 80);
       await veilOpen(kind, def);
     } catch (e) { console.error(e); }
@@ -123,6 +136,29 @@
     veil.className = 'on';
     if (kind === 'cut') return;
     const card = courseCard(def);
+    if (kind === 'glide') {
+      veil.className = 'on glide';
+      if (current) current.root.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 650, easing: 'ease-in', fill: 'forwards' });
+      LT.world.show(true, { dur: 0.7 });
+      LT.light.set({ darkness: 0.12, radius: 1100 });
+      LT.world.mood({ dim: 1, soft: 0, cursor: 0.35 });
+      const wd = def.world || {};
+      const shot = wd.glideShot || wd.shot || (def.index >= 1 && LT.world.SHOTS['course' + def.index] ? 'course' + def.index : 'menu');
+      LT.audio.sfx('whoosh', { dur: 2.4, low: 90, high: 520, g: 0.14 });
+      const moving = LT.world.shot(shot, { dur: U.reducedMotion ? 0.3 : 2.9 });
+      await U.wait(550);
+      if (card) {
+        veil.appendChild(card);
+        LT.audio.sfx('paper', { dur: 0.4, g: 0.6 });
+        await card.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 800, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'forwards' }).finished;
+      }
+      await moving;
+      if (card) {
+        await U.wait(U.reducedMotion ? 200 : 650);
+        await card.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(-8px)' }], { duration: 450, easing: 'ease-in', fill: 'forwards' }).finished;
+      }
+      return;
+    }
     if (kind === 'cloth') {
       const cloth = el('div', { class: 'veil-cloth' });
       veil.appendChild(cloth);
@@ -152,6 +188,15 @@
   }
   async function veilOpen(kind) {
     if (kind === 'cut') { veil.className = ''; veil.innerHTML = ''; return; }
+    if (kind === 'glide') {
+      veil.className = ''; veil.innerHTML = '';
+      const root = current && current.root;
+      if (root) await root.animate([{ opacity: 0 }, { opacity: 1 }], { duration: U.reducedMotion ? 150 : 900, easing: 'ease-out', fill: 'forwards' }).finished;
+      if (root) { root.style.opacity = ''; root.getAnimations().forEach((a) => a.cancel()); }
+      const wd = current && current.def.world;
+      if (!(wd && wd.visible !== false)) LT.world.show(false, { dur: 0.3 });
+      return;
+    }
     if (kind === 'cloth') {
       const cloth = veil.querySelector('.veil-cloth');
       LT.audio.sfx('whoosh', { dur: 0.5, low: 400, high: 2600 });
@@ -294,6 +339,11 @@
   app.start = function () {
     const root = document.getElementById('app') || document.body.appendChild(el('div', { id: 'app' }));
     root.innerHTML = '';
+    LT.world = LT.world || { ok: false };
+    const worldCv = el('canvas', { id: 'world', 'aria-hidden': 'true' });
+    root.appendChild(worldCv);
+    if (LT.world && LT.world.mount) LT.world.mount(worldCv);
+    if (!LT.world.ok) worldCv.remove();
     const stage = el('main', { id: 'stage' });
     const vignette = el('div', { id: 'vignette', 'aria-hidden': 'true' });
     const dark = el('div', { id: 'dark', 'aria-hidden': 'true' });

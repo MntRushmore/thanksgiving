@@ -14,6 +14,7 @@ const js = [...html.matchAll(/<script src="(js\/[^"]+)"><\/script>/g)].map((m) =
 const safeJs = js.replace(/<\/script/gi, '<\\/script');
 const fonts = html.match(/<link rel="preconnect"[^>]*>\s*<link rel="preconnect"[^>]*>\s*<link rel="stylesheet" href="https:\/\/fonts[^>]*>/)[0];
 const title = html.match(/<title>[^<]*<\/title>/)[0];
+const cdn = [...html.matchAll(/<script src="https:[^"]+"><\/script>/g)].map((m) => m[0]).join('\n');
 const desc = html.match(/<meta name="description"[^>]*>/)[0];
 
 const inner = `${title}
@@ -23,6 +24,7 @@ ${fonts}
 ${css}
 </style>
 <div id="app"></div>
+${cdn}
 <script>
 ${safeJs}
 </script>

@@ -64,6 +64,7 @@ button { font: inherit; color: inherit; }
 ::selection { background: var(--lemon); color: var(--ink); }
 
 #app { position: fixed; inset: 0; overflow: hidden; background: var(--ground); }
+#world { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; opacity: 0; pointer-events: none; }
 #stage { position: absolute; inset: 0; z-index: 1; will-change: transform; }
 .chapter { position: absolute; inset: 0; overflow: hidden; }
 .chapter.scrolls { overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: var(--ground-3) transparent; }
@@ -243,3 +244,17 @@ button { font: inherit; color: inherit; }
   #grain { animation: none; }
 }
 @keyframes match-flicker { from { transform: scale(1, 1) translateY(0); opacity: .95; } to { transform: scale(.92, 1.08) translateY(-1px); opacity: 1; } }
+
+/* the veil when the camera is doing the work */
+#veil.glide { pointer-events: auto; }
+#veil.glide .veil-card { background: radial-gradient(ellipse 60% 46% at 50% 50%, rgba(6, 4, 3, 0.72), rgba(6, 4, 3, 0.35) 60%, rgba(6, 4, 3, 0) 80%); }
+#veil.glide .veil-card .t, #veil.glide .veil-card .b { text-shadow: 0 2px 24px rgba(0, 0, 0, 0.9); }
+.on-world.grace { background: transparent; }
+
+/* the prelude when the world is real: the 3D candle takes the canvas's place */
+.prelude.in3d canvas.candle { visibility: hidden; }
+.prelude.in3d .title h1 { text-shadow: 0 0 40px rgba(255, 170, 80, 0.35), 0 4px 30px rgba(0, 0, 0, 0.85); }
+.prelude.in3d .title .sub, .prelude.in3d .title .date { text-shadow: 0 2px 16px rgba(0, 0, 0, 0.9); }
+.prelude.in3d .below { position: relative; }
+.prelude.in3d .below::before { content: ""; position: absolute; left: 50%; top: 50%; width: min(720px, 120vw); height: 260px; transform: translate(-50%, -50%); z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(5, 4, 3, 0.85), rgba(5, 4, 3, 0.5) 55%, rgba(5, 4, 3, 0) 80%); }

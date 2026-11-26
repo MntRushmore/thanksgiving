@@ -488,15 +488,31 @@
           el('p', { class: 'lo-small' }, 'The candle from the beginning has burned down a long way. It’s late. Somebody has to do it.'));
         const hold = el('button', { class: 'lt-btn hold-btn', type: 'button' }, el('span', { class: 'fill', 'aria-hidden': 'true' }), el('span', { class: 'lbl' }, 'Hold to blow out the candle'));
         box.append(el('div', { class: 'lo-candle-wrap' }, cv), say, hold);
-        const candle = LT.candle(cv, { lit: true, burn: 0.62, blowDir: -1 });
-        offs.push(() => candle.destroy());
-        LT.light.set({ darkness: 0.8, radius: 460 });
-        LT.light.follow(false);
-        const keepLit = () => { const p = candle.flamePos(); LT.light.moveTo(p.x, p.y + 120); };
-        api.timeout(keepLit, 100);
-        const onRs = () => keepLit();
-        addEventListener('resize', onRs); offs.push(() => removeEventListener('resize', onRs));
-        offs.push(() => LT.light.follow(true));
+        const W = LT.world, in3d = !!W.ok;
+        let candle;
+        if (in3d) {
+          // back at the real table: the night is nearly over, every candle has burned down
+          box.classList.add('in3d');
+          root.classList.add('lo-world');
+          W.aftermath(true); W.setCandles(1); W.hero.burn(0.62); W.hero.light();
+          W.shot('above', { dur: 0 });
+          W.mood({ dim: 0.72, soft: 0, cursor: 0.08, moon: 0.3, instant: true });
+          W.show(true, { dur: 1.6 });
+          W.shot('finale', { dur: U.reducedMotion ? 0.4 : 7, ease: 'inOutSine', lift: 0.05 });
+          LT.light.set({ darkness: 0.16, radius: 1000 });
+          candle = { blow: (v) => W.hero.blow(v), out: () => W.hero.out(), destroy() {} };
+          offs.push(() => { root.classList.remove('lo-world'); W.show(false, { dur: 0.6 }); });
+        } else {
+          candle = LT.candle(cv, { lit: true, burn: 0.62, blowDir: -1 });
+          offs.push(() => candle.destroy());
+          LT.light.set({ darkness: 0.8, radius: 460 });
+          LT.light.follow(false);
+          const keepLit = () => { const p = candle.flamePos(); LT.light.moveTo(p.x, p.y + 120); };
+          api.timeout(keepLit, 100);
+          const onRs = () => keepLit();
+          addEventListener('resize', onRs); offs.push(() => removeEventListener('resize', onRs));
+          offs.push(() => LT.light.follow(true));
+        }
 
         // a breath you can hold
         let pressing = false, strength = 0, done = false, breath = null;
@@ -521,9 +537,9 @@
         hold.addEventListener('keyup', (e) => { if (e.key === ' ' || e.key === 'Enter') up(); });
         hold.addEventListener('contextmenu', (e) => e.preventDefault());
         const fill = hold.querySelector('.fill');
-        offs.push(LT.loop.add((dt) => {
+        offs.push(LT.loop.add((dt, _t, raw) => {
           if (done) return;
-          strength = U.clamp(strength + (pressing ? dt / 1.7 : -dt / 0.6), 0, 1);
+          strength = U.clamp(strength + (pressing ? raw / 1.7 : -raw / 0.6), 0, 1);
           candle.blow(strength * 0.95);
           fill.style.transform = `scaleX(${strength})`;
           if (breath) {
@@ -543,6 +559,20 @@
           LT.music.stop(3.5);
           hold.remove();
           say.style.opacity = 0;
+          if (in3d) {
+            // your breath travels the length of the table
+            await api.wait(500);
+            W.shot('reveal', { dur: U.reducedMotion ? 0.4 : 7.5, ease: 'inOutSine', lift: 0.25 });
+            W.mood({ cursor: 0, moon: 0.25 });
+            LT.audio.sfx('blow', { dur: 2.4, g: 0.12 });
+            await W.extinguish({ gap: 0.075 });
+            await api.wait(800);
+            W.mood({ dim: 0, moon: 0 });
+            LT.light.set({ darkness: 0.6, radius: 0 });
+            await api.wait(1800);
+            finale();
+            return;
+          }
           LT.light.follow(false);
           LT.light.set({ darkness: 1, radius: 0 });
           await api.wait(2600);
