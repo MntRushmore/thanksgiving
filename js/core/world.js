@@ -364,7 +364,7 @@
     mats.china = new T.MeshStandardMaterial({ color: '#e2dacb', roughness: 0.24, metalness: 0, envMap, envMapIntensity: 0.55 });
     mats.gold = new T.MeshStandardMaterial({ color: '#c9a04a', metalness: 1, roughness: 0.3, envMap });
     mats.glass = new T.MeshStandardMaterial({ color: '#f6efe2', roughness: 0.03, metalness: 0.3, envMap, envMapIntensity: 1.0, transparent: true, opacity: 0.11, depthWrite: false, side: T.DoubleSide });
-    mats.roemer = new T.MeshStandardMaterial({ color: '#8fae5a', roughness: 0.05, metalness: 0.1, envMap, envMapIntensity: 2, transparent: true, opacity: 0.45, depthWrite: false, side: T.DoubleSide });
+    mats.roemer = new T.MeshStandardMaterial({ color: '#7d9a4e', roughness: 0.08, metalness: 0.1, envMap, envMapIntensity: 0.9, transparent: true, opacity: 0.32, depthWrite: false, side: T.DoubleSide });
     mats.wine = new T.MeshStandardMaterial({ color: '#4a0710', roughness: 0.1, metalness: 0, envMap, envMapIntensity: 0.8, transparent: true, opacity: 0.88 });
     mats.wax = new T.MeshStandardMaterial({ color: '#efe3c6', roughness: 0.6, emissive: '#3a1a05', emissiveIntensity: 0.4 });
     mats.wood = new T.MeshStandardMaterial({ color: '#5a3a22', roughness: 0.62, metalness: 0, map: woodTex() });
@@ -573,7 +573,7 @@
     R.skyU = skyU; R.sky = sky;
 
     // spare candles any act can place (a seat candle, a candle on a hill)
-    const XN = 96, xp = new Float32Array(XN * 3), xs = new Float32Array(XN), xl = new Float32Array(XN), xz = new Float32Array(XN).fill(0.05);
+    const XN = 192, xp = new Float32Array(XN * 3), xs = new Float32Array(XN), xl = new Float32Array(XN), xz = new Float32Array(XN).fill(0.05);
     for (let i = 0; i < XN; i++) { xs[i] = rnd(); xp[i * 3 + 1] = -100; }
     const xg = new T.BufferGeometry();
     xg.setAttribute('position', new T.BufferAttribute(xp, 3)); xg.setAttribute('aSeed', new T.BufferAttribute(xs, 1));

@@ -29,7 +29,7 @@
       sound(h) { if (h && h.stop) cleanups.push(() => h.stop(0.6)); return h; },
       cleanup(fn) { cleanups.push(fn); },
       lock(hint) { locked = true; ui.next.classList.add('locked'); if (hint) ctx.hint(hint); },
-      unlock() { locked = false; ui.next.classList.remove('locked'); ui.next.classList.add('ready'); setTimeout(() => ui.next.classList.remove('ready'), 1600); },
+      unlock() { locked = false; ctx.hint(''); ui.next.classList.remove('locked'); ui.next.classList.add('ready'); setTimeout(() => ui.next.classList.remove('ready'), 1600); },
       next() { if (ctx.alive) J.next(true); },
       caption(text) { setCaption(text); },
       note(text) { setNote(text); },
@@ -180,7 +180,8 @@
     ui.cite.textContent = beat.cite || '';
     ui.cite.hidden = !beat.cite;
     if (beat.mood) W.mood(beat.mood);
-    if (beat.shot) W.shot(beat.shot, { dur: beat.dur ?? 2.6, ease: beat.ease, lift: beat.lift });
+    const shot = typeof beat.shot === 'function' ? beat.shot(W, dir) : beat.shot;
+    if (shot) W.shot(shot, { dur: beat.dur ?? 2.6, ease: beat.ease, lift: beat.lift });
     beatCtx = makeCtx(beat, dir);
     if (beat.lock) beatCtx.lock(beat.lock === true ? '' : beat.lock);
     try { const r = beat.enter && beat.enter(beatCtx, dir); if (r && r.catch) r.catch((e) => console.warn('beat', beat.id, e)); } catch (e) { console.warn('beat', beat.id, e); }
