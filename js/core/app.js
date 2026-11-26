@@ -309,7 +309,9 @@
     addEventListener('keydown', onKey);
     addEventListener('hashchange', () => {
       const id = location.hash.slice(1);
-      if (chapters[id] && current && current.def.id !== 'prelude' && current.def.id !== id) LT.go(id);
+      if (!chapters[id] || !current) return;
+      if (current.def.id === 'prelude') LT.requested = id;
+      else if (current.def.id !== id) LT.go(id);
     });
     // Unlock audio on the very first gesture anywhere.
     const unlock = () => { LT.audio.init(); removeEventListener('pointerdown', unlock); removeEventListener('keydown', unlock); };
