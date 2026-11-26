@@ -204,10 +204,10 @@
               ].map((s) => el('li', null, s)))));
           layer.appendChild(roll);
           // and then, quietly, someone lights it again
+          const ps = el('p', { class: 'lt-script jr-ps' }, 'P.S. Grandma lit it again. Take a plate.');
           ctx.later(() => {
             W.hero.burn(0.62); W.hero.light(); LT.audio.sfx('whoomp');
-            const p = W.hero.worldPos();
-            ctx.label(p.clone().add(new W.T.Vector3(0, 0.1, 0)), 'Grandma lit it again. Take a plate.', { cls: '' });
+            roll.appendChild(ps);
             LT.music.param('night', 0.1);
           }, 9000);
         },
