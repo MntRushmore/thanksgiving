@@ -157,7 +157,7 @@
       const old = curAct;
       if (old) { try { old.exit && old.exit(W, beat.act); } catch (e) { console.warn(e); } }
       curAct = beat.act;
-      J.acts.forEach((a) => { if (a.group) a.group.visible = a === curAct || (a.keepVisible && a.keepVisible(curAct)); });
+      J.acts.forEach((a) => { if (a.group) a.group.visible = a === curAct || !!(a.keepVisible && a.keepVisible(curAct)); });
       if (curAct.music) LT.music.play(curAct.music, 2.5);
       try { curAct.enter && curAct.enter(W, old); } catch (e) { console.warn(e); }
       ui.act.innerHTML = '';
