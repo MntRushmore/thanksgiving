@@ -392,7 +392,7 @@
           setLit(['have', 'miss'], false, true);
           if (!LT.state.chair) setLit(['chair'], false, true); else setLit(['chair'], true);
           LT.music.param('swell', 0);
-          round(ctx, ROUND1, { caption: 'Let’s go around\nthe table.', note: intro(), ms: RM ? 1500 : 5200 });
+          round(ctx, ROUND1, { caption: 'Let’s go around\nthe table.', note: intro(), ms: 5600 });
         },
       },
       {
@@ -433,7 +433,7 @@
               focus('biscuit');
               ctx.later(() => { LT.audio.sfx('thud', { g: 0.25 }); ctx.later(() => LT.audio.sfx('thud', { g: 0.2 }), 240); }, RM ? 50 : 1200);
               ctx.caption(L.say); ctx.note(`${L.name} \u00b7 ${L.more}`);
-              timer = ctx.later(nextLine, RM ? 1500 : 5200);
+              timer = ctx.later(nextLine, 5200);
               return;
             }
             if (step === 1) {
@@ -443,13 +443,13 @@
             }
             if (g.joe) {
               const js = seatXZ(W, SEAT_OF.joe);
-              ctx.shot({ pos: [-0.32, W.TOP + 0.45, js.z + 1.25], look: [js.side * 0.55, W.TOP + 0.12, js.z], fov: 32 }, { dur: RM ? 0.4 : 3.2 });
+              ctx.shot({ pos: [-0.12, W.TOP + 0.5, js.z + 1.0], look: [js.side * 0.34, W.TOP + 0.1, js.z - 0.05], fov: 34 }, { dur: RM ? 0.4 : 3.2 });
               ctx.later(() => { setLit(['joe'], true); LT.audio.sfx('whoomp'); LT.music.param('swell', 0.45); }, RM ? 100 : 2000);
               ctx.label(new W.T.Vector3(js.side * 0.36, W.TOP + 0.12, js.z - 0.12), 'Grandpa Joe', { cls: 'ga-name ga-joe' });
             }
             if (g.end) { ctx.shot(seatShot('grandma'), { dur: RM ? 0.4 : 2.6 }); LT.music.param('swell', 0.2); ctx.hint('Next \u2192'); skip.remove(); }
             ctx.caption(g.say); ctx.note(g.more);
-            timer = ctx.later(nextLine, RM ? Math.min(1500, g.ms) : g.ms);
+            timer = ctx.later(nextLine, g.ms);
           };
           const skip = ctx.button('Next line', () => { clearTimeout(timer); nextLine(); }, { ghost: true });
           skip.classList.add('ga-more');
@@ -525,7 +525,7 @@
         },
       },
       {
-        id: 'grace-hands', caption: 'Pick one thing\non your plate.', shot: { pos: [-0.3, 1.03, 1.14], look: [-0.08, 0.77, 0.75], fov: 26 }, dur: 2.6, lock: 'Follow the cranberry',
+        id: 'grace-hands', caption: 'Pick one thing\non your plate.', shot: { pos: [-0.3, 1.03, 1.14], look: [-0.08, 0.77, 0.75], fov: 26 }, dur: 2.6, lock: true,
         note: 'One cranberry. Someone grew it, something pollinated it, something carved the bog it grew in.',
         mood: { dim: 1, soft: 0, cursor: 0.12, moon: 0.05 },
         enter(ctx, dir) {
@@ -551,7 +551,7 @@
               ctx.label(p, h.l, { cls: 'ga-node one' });
               if (h.note) ctx.note(h.note);
               LT.stats.inc('handsThanked');
-              await ctx.wait(RM ? 120 : 950);
+              await ctx.wait(h.note ? 2600 : 1100);
             }
             ctx.caption('…and behind each of them,\nsomeone else.');
             ctx.note('');
@@ -565,7 +565,7 @@
               const L = ctx.label(p, S.web.label[id], { cls: 'ga-node two' });
               ctx.later(() => L.n.classList.add('fade'), RM ? 600 : 3600);
               LT.stats.inc('handsThanked');
-              await ctx.wait(RM ? 40 : 260);
+              await ctx.wait(240);
             }
             await ctx.wait(RM ? 200 : 1600);
             // everyone else, all the way out
@@ -701,7 +701,8 @@
   act.beats.forEach((b) => {
     if (b.id !== 'grace-hands') {
       const en = b.enter;
-      b.enter = function (ctx, dir) { webVisible(false); family(true); ctx.W.sky(0); ctx.W.fog(0.09); return en && en.call(this, ctx, dir); };
+      const quiet = b.id === 'grace-both' || b.id === 'grace-letter' || b.id === 'grace-thanks';
+      b.enter = function (ctx, dir) { webVisible(false); family(!quiet); ctx.W.sky(0); ctx.W.fog(0.09); return en && en.call(this, ctx, dir); };
     }
     if (typeof b.shot === 'function') { const fn = b.shot; delete b.shot; const enter = b.enter; b.enter = function (ctx, dir) { ctx.shot(fn(), { dur: b.dur ?? 2.4 }); return enter.call(this, ctx, dir); }; }
     if (b.id === 'grace-chair') {

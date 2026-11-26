@@ -752,7 +752,7 @@
       {
         id: 'war', caption: 'Fifty-four years later,\ntheir sons were at *war.*',
         note: '1675–76, King Philip’s War. Metacom, Massasoit’s son, against the colonies; Josiah Winslow, Edward Winslow’s son, governed Plymouth. One of the deadliest wars, for its size, in American history.',
-        shot: { pos: [2.1, 2.2, zOf(1676) + 2.6], look: [-0.1, 0.7, zOf(1676) - 0.6], fov: 40 }, dur: 6,
+        shot: { pos: [3.6, 2.7, zOf(1676) + 0.9], look: [0, 0.72, zOf(1676) - 0.2], fov: 46 }, dur: 6,
         mood: { dim: 1, soft: 0, cursor: 0.15, moon: 0 },
         enter(ctx) {
           const W = ctx.W;
@@ -764,7 +764,7 @@
             U.tween({ from: 0.001, to: 2.2, dur: 2.6, ease: 'outCubic', onUpdate: (v) => {
               if (!ctx.alive) return;
               S.rift.scale.z = v;
-              S.riftEdges.forEach((e) => { e.position.z = zOf(1676) + e.userData.s * v / 2; });
+              S.riftEdges.forEach((e) => { e.position.z = zOf(1676) + e.userData.s * (v / 2 + 0.015); });
               S.riftEdgeMat.opacity = Math.min(1, v * 1.5) * (1 - Math.max(0, v - 1.6));
             } });
             // embers out of the crack
