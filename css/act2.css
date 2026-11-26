@@ -1,0 +1,5 @@
+/* Act II: The Spread. Most of it happens in the world; a little help for the words. */
+.jr-root[data-act="spread"] .jr-label { font-size: 18px; }
+.jr-root[data-beat="spread-fryer"] .jr-caption i,
+.jr-root[data-beat="spread-gravy"] .jr-caption i { color: #ffb36b; }
+.jr-root[data-act="spread"] .hold-btn { min-width: 220px; }

@@ -1,0 +1,23 @@
+/* Act I · The Record */
+.a1-odo-layer { pointer-events: none; }
+.a1-odo { position: absolute; left: max(22px, 5vw); top: calc(env(safe-area-inset-top, 0px) + 78px); display: flex; flex-direction: column; gap: 4px; animation: jr-fade 1s var(--ease-out) both; }
+.a1-odo-num { display: flex; font-family: var(--f-display); font-size: clamp(4rem, 2rem + 9vw, 9.5rem); line-height: 1; color: var(--linen); text-shadow: 0 0 40px rgba(255, 170, 80, 0.35), 0 4px 30px rgba(0, 0, 0, 0.9); font-variant-numeric: oldstyle-nums; letter-spacing: -0.02em; }
+.a1-odo.small .a1-odo-num { font-size: clamp(2.2rem, 1.4rem + 3vw, 3.6rem); color: var(--linen-2); }
+.a1-digit { height: 1em; overflow: hidden; width: 0.6em; display: flex; justify-content: center; }
+.a1-strip { display: flex; flex-direction: column; will-change: transform; }
+.a1-strip span { display: block; height: 1em; line-height: 1; text-align: center; }
+.a1-odo-sub { font-family: var(--f-sc); font-size: var(--step--1); letter-spacing: 0.2em; color: var(--lemon); min-height: 1.3em; text-shadow: 0 2px 10px #000; }
+.jr-label.a1-marker { font-size: 18px; color: #ffe2b0; text-shadow: 0 0 12px rgba(255, 170, 80, 0.7), 0 2px 8px #000; }
+.jr-label.a1-seatyear { font-size: 16px; color: var(--linen-2); }
+.jr-label.a1-count { font-size: clamp(1.6rem, 1rem + 2vw, 2.6rem); }
+.jr-label.a1-tag { font-size: 17px; }
+.jr-label.a1-no { background: rgba(184, 36, 61, 0.92); color: #fff3e6; }
+.jr-label.a1-yes { background: var(--lemon); }
+.a1-cal-layer { pointer-events: none; }
+.a1-cal-hit { position: absolute; left: 0; top: 0; width: 140px; height: 140px; border-radius: 50%; border: 0; background: transparent; cursor: pointer; pointer-events: auto; }
+.a1-cal-hit:focus-visible { outline: 2px dashed var(--lemon); }
+@media (max-width: 640px) {
+  .a1-odo { top: calc(env(safe-area-inset-top, 0px) + 64px); }
+  .a1-odo-num { font-size: clamp(3rem, 1rem + 14vw, 5rem); }
+  .jr-label.a1-marker { font-size: 14px; }
+}
