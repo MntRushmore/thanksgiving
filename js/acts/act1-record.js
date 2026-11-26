@@ -615,7 +615,7 @@
           placeFigures();
           figTargets((f) => (f.group === 'en' ? 0.75 : 0));
           LT.audio.sfx('swell', { dur: 2.4, g: 0.08 });
-          ctx.later(() => ctx.label([FIRE[0], 1.9, FIRE[2]], 'outdoors, at the harvest', { cls: 'glow' }), 1600);
+          ctx.later(() => ctx.label([0.4, 2.1, -155.5], 'outdoors, at the harvest', { cls: 'glow' }), 1600);
         },
       },
       {
