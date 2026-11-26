@@ -837,17 +837,29 @@
   /** a spare candle flame (bring your own candlestick) */
   W.addFlame = (pos, o = {}) => {
     const X = R.extra;
-    if (X.n >= X.max) return null;
-    const i = X.n++;
+    X.free = X.free || [];
+    if (X.n >= X.max && !X.free.length) return null;
+    const i = X.free.length ? X.free.pop() : X.n++;
     const p = pos.isVector3 ? pos.clone() : v3(...pos);
     X.geo.attributes.position.setXYZ(i, p.x, p.y, p.z); X.geo.attributes.position.needsUpdate = true;
     X.halo.attributes.position.setXYZ(i, p.x, p.y, p.z); X.halo.attributes.position.needsUpdate = true;
     if (o.size) { X.geo.attributes.aSize.setX(i, o.size); X.geo.attributes.aSize.needsUpdate = true; }
     const f = { i, lit: 0, target: 0, pos: p,
       light() { f.target = 1; return f; }, out() { f.target = 0; return f; },
-      move(q) { f.pos.copy(q.isVector3 ? q : v3(...q)); X.geo.attributes.position.setXYZ(i, f.pos.x, f.pos.y, f.pos.z); X.halo.attributes.position.setXYZ(i, f.pos.x, f.pos.y, f.pos.z); X.geo.attributes.position.needsUpdate = X.halo.attributes.position.needsUpdate = true; } };
+      move(q) { f.pos.copy(q.isVector3 ? q : v3(...q)); X.geo.attributes.position.setXYZ(i, f.pos.x, f.pos.y, f.pos.z); X.halo.attributes.position.setXYZ(i, f.pos.x, f.pos.y, f.pos.z); X.geo.attributes.position.needsUpdate = X.halo.attributes.position.needsUpdate = true; },
+      remove() { W.removeFlame(f); } };
     X.list.push(f);
     return f;
+  };
+  /** give a spare flame back */
+  W.removeFlame = (f) => {
+    const X = R.extra, k = X.list.indexOf(f);
+    if (k < 0) return;
+    X.list.splice(k, 1);
+    X.geo.attributes.aLit.array[f.i] = 0; X.geo.attributes.aLit.needsUpdate = true;
+    X.geo.attributes.position.setY(f.i, -100); X.halo.attributes.position.setY(f.i, -100);
+    X.geo.attributes.position.needsUpdate = X.halo.attributes.position.needsUpdate = true;
+    (X.free = X.free || []).push(f.i);
   };
   /** a pewter candlestick with a candle, flame included; returns {group, flame} */
   W.makeCandle = (parent, pos, o = {}) => {
@@ -952,7 +964,7 @@
       const d = ray.ray.direction, o = ray.ray.origin;
       if (d.y < -0.02) {
         const s = (TOP - o.y) / d.y;
-        hit.set(U.clamp(o.x + d.x * s, -1.2, 1.2), TOP, U.clamp(o.z + d.z * s, cam.pos.z - 7, cam.pos.z + 0.4));
+        hit.set(U.clamp(o.x + d.x * s, cam.pos.x - 8, cam.pos.x + 8), TOP, U.clamp(o.z + d.z * s, cam.pos.z - 9, cam.pos.z + 2));
       }
     }
     const want = v3(hit.x * 0.92, TOP + 0.5, hit.z + 0.12);
