@@ -8,7 +8,7 @@
 
 /* the postcard */
 .rec-pc { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); gap: clamp(20px, 3vw, 40px); align-items: start; max-width: 1280px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px)); box-sizing: border-box; }
-.rec-pc-card { transform: rotate(-0.8deg); filter: drop-shadow(0 26px 40px rgba(0, 0, 0, 0.6)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)); }
+.rec-pc-card { transform: rotate(-0.8deg); box-shadow: 0 26px 40px rgba(0, 0, 0, 0.6), 0 4px 8px rgba(0, 0, 0, 0.5); }
 .rec-pc-frame { position: relative; width: 100%; aspect-ratio: 1200 / 760; border-radius: 6px; overflow: hidden; touch-action: none; cursor: none; background: #f6ecd6; user-select: none; -webkit-user-select: none; }
 .rec-pc-layer { position: absolute; inset: 0; }
 .rec-pc-svg { display: block; width: 100%; height: 100%; }

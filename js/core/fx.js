@@ -57,9 +57,12 @@
     return p;
   }
 
+  let wasEmpty = true;
   function update(dt) {
     if (!cx) return;
     emitters.forEach((e) => e(dt));
+    if (!parts.length) { if (!wasEmpty) { cx.clearRect(0, 0, W, H); wasEmpty = true; } return; }
+    wasEmpty = false;
     cx.clearRect(0, 0, W, H);
     for (let i = parts.length - 1; i >= 0; i--) {
       const p = parts[i];

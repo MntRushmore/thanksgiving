@@ -92,7 +92,7 @@
   LT.chapter({
     id: 'grace', index: 4, numeral: 'IV', course: 'Fourth Course', title: 'Grace',
     blurb: 'What gratitude actually is.', music: 'grace', transition: 'smoke',
-    light: { darkness: 0.82, radius: 320 },
+    light: { darkness: 0.74, radius: 380 },
     mount(root, api) {
       root.classList.add('grace');
       LT.music.param('melody', 0.15);
@@ -164,7 +164,7 @@
           const r = target.getBoundingClientRect();
           LT.light.follow(false);
           LT.light.moveTo(r.left + r.width / 2, r.top + r.height / 2 + (o.dy || 0));
-          LT.light.set({ radius: o.radius || Math.max(r.width, r.height) * 0.62 + 140, darkness: o.darkness ?? 0.8 });
+          LT.light.set({ radius: o.radius || Math.max(r.width, r.height) * 0.7 + 220, darkness: o.darkness ?? 0.72 });
         };
         respot();
       }

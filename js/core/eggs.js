@@ -8,6 +8,10 @@
   LT.defineEgg('pardon', 'Presidential pardon', 'Type the word a president says to a turkey.');
   LT.defineEgg('welcome', 'You’re welcome', 'Type the word this whole thing is about.');
   LT.defineEgg('nap', 'The nap', 'Step away from the table for a while.');
+  // secrets that live in the dinner game, declared here so the fridge knows they exist
+  LT.defineEgg('goodboy', 'Good boy', 'Biscuit is persistent. Be more persistent.');
+  LT.defineEgg('joeschair', 'Grandpa Joe\u2019s place', 'There is an empty chair at dinner.');
+  LT.defineEgg('bingo', 'Family Bingo', 'Three in a row.');
 
   const inPrelude = () => LT.current() === 'prelude';
 

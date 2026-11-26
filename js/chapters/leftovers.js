@@ -19,7 +19,20 @@
     incidentsHandled: { label: 'Incidents handled', food: '#6f8a4a', note: 'Peas, dog, alarm, gravy. You were the adult in the room.' },
     handsThanked: { label: 'Hands thanked', food: '#f2c14e', note: 'And there were always more behind them.' },
     lettersWritten: { label: 'Letters written', food: '#e8dcc1', note: 'Now send it. It will mean more than you think.' },
+    candlesLit: { label: 'Candles lit', food: '#f4ead3', note: 'For what you have, and for what you miss.' },
+    balloonsReleased: { label: 'Balloons released', food: '#3d5878', note: 'Macy\u2019s really did let them go in 1928. Somewhere over Queens, they popped.' },
+    turkeySlices: { label: 'Turkey slices', food: '#e7c9a0', note: 'Dark meat or white? Wrong answer either way, according to someone.' },
+    gobbles: { label: 'Gobbles', food: '#7a4a24', note: 'Only the males gobble. You did too, apparently.' },
+    jellySlices: { label: 'Jelly slices (along the ridges)', food: '#8f1a2e', note: 'The ridges are for the can\u2019s strength. Everyone uses them as a guide anyway.' },
+    onionsDropped: { label: 'Crispy onions', food: '#c98a3a', note: 'Dorcas Reilly would want you to have more.' },
+    creamDollops: { label: 'Whipped cream', food: '#fbf6ea', note: 'Structurally, the pie is now mostly cream.' },
+    cheesePulls: { label: 'Cheese pulls', food: '#f0b83c', note: 'Thank James Hemings.' },
+    tableHighTemp: { label: 'Peak family temp', food: '#b8243d', note: 'Done is 165\u00b0F. Families run hotter.', unit: '\u00b0F' },
+    dinnersSurvived: { label: 'Dinners survived', food: '#d9a441', note: 'Promoted from the kids\u2019 table. It goes on your permanent record.' },
+    dinnersExploded: { label: 'Dinners exploded', food: '#3a2a1c', note: 'Yep. That\u2019s us.' },
+    dogBribes: { label: 'Dog bribes', food: '#d39a4c', note: 'Biscuit sends his regards.' },
   };
+  const STAT_ORDER = Object.keys(STAT_INFO);
   const LID_COLORS = ['#6f1526', '#646a3a', '#d9a441', '#2c7a74', '#b9552a', '#5b4870', '#3d5878'];
   const humanize = (k) => k.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase());
 
@@ -111,14 +124,16 @@
       function buildShelves() {
         const items = [];
         const stats = LT.state.stats || {};
-        Object.keys(stats).filter((k) => stats[k] > 0).forEach((k) => {
-          const info = STAT_INFO[k] || { label: humanize(k), food: '#c98a3a', note: '' };
-          items.push({ kind: 'stat', label: info.label, value: stats[k], food: info.food, note: info.note });
+        const rank = (k) => { const i = STAT_ORDER.indexOf(k); return i < 0 ? 99 : i; };
+        Object.keys(stats).filter((k) => stats[k] > 0 && STAT_INFO[k]).sort((a, b) => rank(a) - rank(b)).slice(0, 14).forEach((k) => {
+          const info = STAT_INFO[k];
+          items.push({ kind: 'stat', label: info.label, value: Math.round(stats[k]) + (info.unit || ''), food: info.food, note: info.note });
         });
         const eggs = LT.state.eggs || {};
         Object.keys(eggs).forEach((id) => items.push({ kind: 'egg', label: eggs[id].title, value: '✦', food: '#f2c14e', note: eggs[id].note || 'A secret, found.' }));
         const unknown = (LT.eggCatalog || []).filter((e) => !eggs[e.id]);
-        unknown.forEach((e) => items.push({ kind: 'mystery', label: '???', value: '', food: '#4a4a3a', note: e.hint ? `Mystery leftovers. Hint: ${e.hint}` : 'Mystery leftovers. Do not open.' }));
+        U.shuffle(unknown).slice(0, 5).forEach((e) => items.push({ kind: 'mystery', label: '???', value: '', food: '#4a4a3a', note: e.hint ? `Mystery leftovers. Hint: ${e.hint}` : 'Mystery leftovers. Do not open.' }));
+        if (unknown.length > 5) items.push({ kind: 'mystery', label: `${unknown.length - 5} more ???`, value: '', food: '#4a4a3a', note: `${unknown.length - 5} more secrets are still out there, in the courses and in the keys you type.` });
         if (!items.some((i) => i.kind === 'stat')) {
           items.unshift({ kind: 'stat', label: 'Turkey (untouched)', value: '1', food: '#c98a3a', note: 'You skipped straight to dessert. Honestly? Respect.' });
         }
