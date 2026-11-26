@@ -60,6 +60,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 button { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
 ::selection { background: var(--lemon); color: var(--ink); }
 
 #app { position: fixed; inset: 0; overflow: hidden; background: var(--ground); }

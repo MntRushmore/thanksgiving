@@ -132,9 +132,12 @@
       const tip = lean * h * 0.55 + bl * h * 0.9 * (opts.blowDir || 1);
       const x = cxm + lean * 2 * s, y = wickY + 3 * s;
       c.globalCompositeOperation = 'lighter';
-      const halo = c.createRadialGradient(x + tip * 0.4, y - h * 0.45, 0, x + tip * 0.4, y - h * 0.45, h * 3.4);
+      // keep the halo inside the canvas so its edge never shows as a box
+      const hx = x + tip * 0.4, hy = y - h * 0.45;
+      const hr = Math.max(4, Math.min(h * 3.4, hx - 1, W - hx - 1, hy - 1, H - hy - 1));
+      const halo = c.createRadialGradient(hx, hy, 0, hx, hy, hr);
       halo.addColorStop(0, `rgba(255,190,100,${0.42 * f})`); halo.addColorStop(0.35, `rgba(255,150,60,${0.14 * f})`); halo.addColorStop(1, 'rgba(255,120,40,0)');
-      c.fillStyle = halo; c.fillRect(x - h * 3.5, y - h * 4, h * 7, h * 7);
+      c.fillStyle = halo; c.beginPath(); c.arc(hx, hy, hr, 0, Math.PI * 2); c.fill();
       c.globalCompositeOperation = 'source-over';
       const og = c.createLinearGradient(0, y - h, 0, y);
       og.addColorStop(0, 'rgba(255,110,30,0)'); og.addColorStop(0.25, 'rgba(255,140,40,.85)'); og.addColorStop(0.7, 'rgba(255,196,90,.95)'); og.addColorStop(1, 'rgba(255,170,70,.6)');

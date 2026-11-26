@@ -343,11 +343,12 @@
         const line = el('div', { class: 'g-lines', 'aria-live': 'polite' });
         const nextBtn = el('button', { class: 'g-next', type: 'button' });
         const skip = el('button', { class: 'g-skip', type: 'button', 'data-noadvance': '' }, 'Skip to your turn');
-        sec.append(map.el, frame, el('div', { class: 'g-speaker' }, name, blurb), line, el('div', { class: 'g-controls' }, nextBtn, skip));
+        const body = el('div', { class: 'g-round-body' }, frame, el('div', { class: 'g-round-text' }, el('div', { class: 'g-speaker' }, name, blurb), line, el('div', { class: 'g-controls' }, nextBtn, skip)));
+        sec.append(map.el, body);
         const candle = LT.candle(cv, { lit: false, seed: 9 });
         sc.add(() => candle.destroy());
         await api.wait(60);
-        spot(frame, { darkness: 0.8, dy: 40 });
+        spot(body, { darkness: 0.8 });
         let skipping = false;
         skip.addEventListener('click', () => { skipping = true; advanceFn && advanceFn(); });
         nextBtn.style.visibility = 'hidden';
@@ -360,7 +361,7 @@
           line.innerHTML = '';
           const c = pt.show(p);
           if (i === 0) { candle.light(); LT.audio.sfx('whoomp'); }
-          LT.audio.sfx('ting', { g: 0.05, f: 2600 + i * 90 });
+          LT.audio.sfx('ting', { g: 0.05, f: 1800 + i * 50 });
           LT.light.pulse();
           nextBtn.style.visibility = 'hidden';
           await api.wait(RM ? 100 : 650);
@@ -373,6 +374,7 @@
             if (b.act === 'unlook' && c.fig.lookAt) { c.fig.lookAt(0); c.fig.tilt && c.fig.tilt(0); }
             if (b.mood && c.fig.mood) c.fig.mood(b.mood);
             words(line, b.t, dir ? 'g-dir' : 'g-say');
+            while (line.children.length > 3) line.firstElementChild.remove();
             if (!dir && c.fig.talk) {
               c.fig.talk(true);
               const tmo = Math.min(4200, b.t.split(/\s+/).length * 230 + 200);
@@ -541,7 +543,7 @@
         const iBtn = letters[2];
         iBtn.focus({ preventScroll: true });
         await clicked(iBtn);
-        hint.style.opacity = 0;
+        hint.style.visibility = 'hidden';
         const lf = iBtn.querySelector('.g-lf');
         lf.classList.add('flip');
         LT.audio.sfx('whoosh', { dur: 0.35, low: 800, high: 3000, g: 0.15 });
@@ -686,9 +688,12 @@
         swell(0.5, 0.1, 6000);
         status.innerHTML = '';
         words(status, 'You don’t have to blow one out to light the other.', 'g-lede');
+        status.scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'nearest' });
         await api.wait(RM ? 200 : 2000);
         const cont = el('button', { class: 'lt-btn lt-btn--ghost', type: 'button' }, 'Next: the evidence', el('span', { 'aria-hidden': 'true' }, '→'));
-        sec.appendChild(el('div', { class: 'g-btns' }, cont));
+        const cw = el('div', { class: 'g-btns' }, cont);
+        sec.appendChild(cw);
+        cw.scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'nearest' });
         await clicked(cont);
       }
 
@@ -829,13 +834,14 @@
         LT.fx.embers(2.5);
         await api.wait(RM ? 200 : 2600);
         if (LT.state.thanks) {
-          const L3 = el('p', { class: 'g-end-3' }, 'You said you’re thankful for ', el('span', { class: 'lt-script' }, LT.state.thanks), ' Hold it there a while.');
+          const L3 = el('p', { class: 'g-end-3' }, 'You said you’re thankful for', el('span', { class: 'lt-script' }, LT.state.thanks), 'Hold the light there a while.');
           lines.appendChild(L3); L3.classList.add('g-rise');
           await api.wait(RM ? 200 : 2200);
         }
         const nb = api.nextButton('Dessert is on the counter');
         const wrap = el('div', { class: 'g-end-next g-rise' }, nb);
         lines.appendChild(wrap);
+        api.timeout(() => wrap.scrollIntoView({ behavior: RM ? 'auto' : 'smooth', block: 'nearest' }), 300);
         freeLight({ darkness: 0.5, radius: 560 });
         nb.focus({ preventScroll: true });
       }
@@ -888,7 +894,7 @@
     }
     function add(d, parent, ang) {
       const depth = parent ? parent.depth + 1 : 0;
-      const dist = depth === 1 ? 70 : 40;
+      const dist = depth === 1 ? 90 : 55;
       const n = {
         label: d.l, note: d.n || NOTE[d.l] || '', type: d.t || 'p', kids: d.k || null, parent, depth,
         x: parent ? parent.x + Math.cos(ang) * dist : 0, y: parent ? parent.y + Math.sin(ang) * dist : 0,
@@ -981,9 +987,9 @@
           const b = nodes[j];
           let dx = b.x - a.x, dy = b.y - a.y;
           const d2 = dx * dx + dy * dy;
-          if (d2 > 90000) continue;
+          if (d2 > 122500) continue;
           const d = Math.sqrt(d2) || 0.01;
-          const f = 2600 / (d2 + 120);
+          const f = (a.depth <= 1 || b.depth <= 1 ? 6400 : 3400) / (d2 + 160);
           dx /= d; dy /= d;
           a.vx -= dx * f * dt * 60; a.vy -= dy * f * dt * 60;
           b.vx += dx * f * dt * 60; b.vy += dy * f * dt * 60;
@@ -992,7 +998,7 @@
       for (const c of nodes) {
         if (!c.parent) continue;
         const p = c.parent;
-        const rest = c.depth === 1 ? 150 : c.depth === 2 ? 96 : 70;
+        const rest = c.depth === 1 ? 190 : c.depth === 2 ? 118 : 80;
         let dx = c.x - p.x, dy = c.y - p.y;
         const d = Math.hypot(dx, dy) || 0.01;
         const f = (d - rest) * 2.4 * dt;
@@ -1062,23 +1068,26 @@
       }
       c.globalCompositeOperation = 'source-over';
       // unexpanded rings
-      if (cam.s > 0.28) {
+      if (cam.s > 0.45 && !blooming) {
         for (const n of nodes) {
           if (n.expanded) continue;
           const p = toScreen(n), r = radius(n);
           const pulse = 0.5 + 0.5 * Math.sin(t * 3 + n.seed);
-          c.strokeStyle = `rgba(242,193,78,${(0.25 + 0.35 * pulse) * U.clamp((cam.s - 0.28) / 0.2, 0, 1)})`;
+          c.strokeStyle = `rgba(242,193,78,${(0.25 + 0.35 * pulse) * U.clamp((cam.s - 0.45) / 0.2, 0, 1)})`;
           c.lineWidth = 1.2;
           c.beginPath(); c.arc(p.x, p.y, r + 4 + pulse * 3, 0, Math.PI * 2); c.stroke();
         }
       }
       // labels
-      const base = U.clamp((cam.s - 0.36) / 0.22, 0, 1);
+      const crowd = nodes.length < 26 ? 1 : 0;
+      const base = U.clamp((cam.s - 0.42) / 0.2, 0, 1);
       c.textAlign = 'center'; c.textBaseline = 'top';
       for (const n of nodes) {
-        const fresh = U.clamp(1 - (t - n.born - 2.2) / 0.8, 0, 1);
-        let a = Math.max(base, n === hover ? 1 : 0, n.depth === 0 ? Math.max(base, 0.9 * (1 - starMode)) : 0, fresh * (cam.s > 0.18 ? 1 : 0));
-        if (n.depth === 1 && cam.s > 0.25) a = Math.max(a, 0.75);
+        const fresh = blooming ? 0 : U.clamp(1 - (t - n.born - 2.4) / 0.8, 0, 1);
+        let a = Math.max(n === hover ? 1 : 0, fresh * (cam.s > 0.3 ? 1 : 0));
+        if (n.depth === 0) a = Math.max(a, 0.95 * (1 - starMode));
+        else if (n.depth === 1) a = Math.max(a, base);
+        else a = Math.max(a, base * crowd);
         a *= U.clamp((t - n.born) / 0.4, 0, 1);
         if (a < 0.02) continue;
         const p = toScreen(n), r = radius(n);

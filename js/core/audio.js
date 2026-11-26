@@ -121,6 +121,9 @@
   /** tone({f, f2, glide, type, t, dur, a, r, g, filter|filters, pan, rev, dest, detune, vib:{rate,depth}}) */
   A.tone = function (o) {
     if (!A.ready) return null;
+    const nyq = ctx.sampleRate * 0.45;
+    if (!(o.f > 0) || o.f >= nyq) return null;
+    if (o.f2 && o.f2 >= nyq) o = Object.assign({}, o, { f2: nyq * 0.98 });
     const t = o.t ?? ctx.currentTime, dur = o.dur ?? 0.3;
     const osc = ctx.createOscillator();
     osc.type = o.type || 'sine';
@@ -465,4 +468,9 @@
     try { fn(o || {}); } catch (e) { console.warn('sfx', name, e); }
   };
   A.names = () => Object.keys(S).concat(Object.keys(L));
+  /** Play one note on a score instrument right now: A.note('musicbox', 76, 1, 0.6) */
+  A.note = (inst, n, dur = 1, v = 0.6, delay = 0) => {
+    if (!A.ready || A.muted || !LT.music || !LT.music.instruments[inst]) return;
+    try { LT.music.instruments[inst](A.sfxBus, ctx.currentTime + delay, n, dur, v); } catch (e) { console.warn(e); }
+  };
 })();
